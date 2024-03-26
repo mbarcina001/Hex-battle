@@ -37,10 +37,21 @@ function App () {
     setActivePlayer(newActivePlayer)
   }
 
+  function getMainContent () {
+    if (winner === '') {
+      return (
+        <Board activePlayer={activePlayer} />
+      )
+    }
+
+    return <p>{`Ganador: Jugador ${winner}`}</p>
+  }
+
   return (
     <>
       <p>{`Turno: ${actualTurn} - Jugador: ${activePlayer}`}</p>
-      {winner === '' ? <Board /> : <p>{`Ganador: Jugador ${winner}`}</p>}
+
+      {getMainContent()}
 
       <Button
         variant='danger'

@@ -5,10 +5,11 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-export default function Board () {
-  const [selectedNodeId, setSelectedNodeId] = useState('')
+export default function Board (activePlayer) {
+  const [selectedHexId, setSelectedHexId] = useState('')
   const [pnjList, setPnjList] = useState([])
   const [cityList, setCityList] = useState([])
+  const [movingPnj, setMovingPnj] = useState(undefined)
 
   useEffect(() => {
     initializeCityList()
@@ -22,31 +23,43 @@ export default function Board () {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cityList])
 
+  useEffect(() => {
+    triggerSelectedHexActions()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedHexId])
+
+  useEffect(() => {
+    if (pnjList?.length) {
+      // TODO: Poner visibles las casillas (?????)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pnjList])
+
   /**
-   * Auxiliar function that initialises player's city list
+   * Auxiliar function that initializes player's city list
    *  Adds first city at a random location
    */
-  async function initializeCityList () {
+  function initializeCityList () {
     const initialCityPlayer1 = {
-      id: 'cit_1',
+      id: 'cit_0',
       name: 'City A',
       owner: 1,
       hexLocationId: getRandomHexLocationId()
     }
     const initialCityPlayer2 = {
-      id: 'cit_2',
+      id: 'cit_1',
       name: 'City B',
       owner: 2,
       hexLocationId: getRandomHexLocationId()
     }
-    await setCityList([initialCityPlayer1, initialCityPlayer2])
+    setCityList([initialCityPlayer1, initialCityPlayer2])
   }
 
   /**
-   * Auxiliar function that initialises player's pnj list
+   * Auxiliar function that initializes player's pnj list
    *  Adds first PNJ in player's first city
    */
-  async function initializePnjList () {
+  function initializePnjList () {
     const initialPnjPlayer1 = {
       type: 'any',
       id: 'pnj_0',
@@ -94,8 +107,8 @@ export default function Board () {
    * @returns {string}
    */
   function getRandomHexLocationId () {
-    const xCoord = getRandomInt(BOARD_TYPES.length)
-    const yCoord = getRandomInt(BOARD_TYPES[xCoord].length)
+    const yCoord = getRandomInt(BOARD_TYPES.length)
+    const xCoord = getRandomInt(BOARD_TYPES[yCoord].length)
     return `${xCoord}_${yCoord}`
   }
 
@@ -103,19 +116,104 @@ export default function Board () {
     return Math.floor(Math.random() * max)
   }
 
+  /**
+   * Auxiliar function that moves received pnj to received location
+   */
+  function movePnj (pnjToMove, locationToMove) {
+    pnjToMove.hexLocationId = locationToMove
+  }
+
+  /**
+   * Auxiliar function that selects pnj to move
+   */
+  function selectPnjToMove (pnjToMove) {
+    setMovingPnj(Object.assign(pnjToMove, {
+      destinationHexs: getPnjDestinationHexs(pnjToMove)
+    }))
+  }
+
+  /**
+   * Trigger selected hex actions:
+   *  - Show destination nodes if pnj is in hex
+   */
+  function triggerSelectedHexActions () {
+    // SELECT PNJ DESTINATION
+    if (movingPnj?.destinationHexs?.includes(selectedHexId)) {
+      movePnj()
+      setSelectedHexId('')
+      setMovingPnj(undefined)
+      return
+    }
+
+    // SELECT PNJ TO MOVE
+    const pnjInHex = getPnjInHex(selectedHexId)
+    if (pnjInHex?.hexLocationId) {
+      selectPnjToMove(pnjInHex)
+      return
+    }
+
+    setMovingPnj(undefined)
+  }
+
+  function getPnjDestinationHexs (pnjInHex) {
+    const coords = getPnjCoords(pnjInHex)
+
+    return []
+      .concat(getHorizontalNearestCoords(coords))
+      .concat(getVerticalNearestCoords(coords))
+      .concat(getDiagonalNearestCoords(coords))
+  }
+
+  function getPnjCoords (pnj) {
+    return {
+      x: parseInt(pnj.hexLocationId.split('_')[0]),
+      y: parseInt(pnj.hexLocationId.split('_')[1])
+    }
+  }
+
+  function getHorizontalNearestCoords (coords) {
+    return [
+      `${coords.x - 1}_${coords.y}`,
+      `${coords.x + 1}_${coords.y}`
+    ]
+  }
+
+  function getVerticalNearestCoords (coords) {
+    return [
+      `${coords.x}_${coords.y - 1}`,
+      `${coords.x}_${coords.y + 1}`
+    ]
+  }
+
+  function getDiagonalNearestCoords (coords) {
+    if (BOARD_TYPES.length / 2 < coords.y) {
+      return [
+        `${coords.x + 1}_${coords.y - 1}`,
+        `${coords.x - 1}_${coords.y + 1}`
+      ]
+    }
+    return [
+      `${coords.x - 1}_${coords.y - 1}`,
+      `${coords.x + 1}_${coords.y + 1}`
+    ]
+  }
+
   return (
     <Container>
       {BOARD_TYPES.map((boardRow, idx) => (
         <Row className='justify-content-md-center' key={idx}>
           {boardRow.map((boardHexType, jdx) => (
-            <Col key={`${idx}_${jdx}`} xs lg='1'>
+            <Col key={`${jdx}_${idx}`} xs lg='1'>
               <Hex
-                id={`${idx}_${jdx}`}
+                id={`${jdx}_${idx}`}
                 type={boardHexType}
-                isSelected={selectedNodeId === `${idx}_${jdx}`}
-                pnjInHex={getPnjInHex(`${idx}_${jdx}`)}
-                cityInHex={getCityInHex(`${idx}_${jdx}`)}
-                setAsSelected={setSelectedNodeId}
+                isSelected={selectedHexId === `${jdx}_${idx}`}
+                // isVisible={activePlayer.visibleHexs?.include(`${jdx}_${idx}`)}
+                isVisible='true'
+                isDestinationHex={movingPnj?.destinationHexs?.includes(`${jdx}_${idx}`)}
+                pnjInHex={getPnjInHex(`${jdx}_${idx}`)}
+                cityInHex={getCityInHex(`${jdx}_${idx}`)}
+                setAsSelected={setSelectedHexId}
               />
             </Col>
           ))}
