@@ -1,6 +1,7 @@
+import './App.scss'
 import { useState } from 'react'
-import './App.css'
 import Board from './components/Board/Board'
+import Button from 'react-bootstrap/Button'
 
 function App () {
   const [actualTurn, setActualTurn] = useState(1)
@@ -41,7 +42,12 @@ function App () {
       <p>{`Turno: ${actualTurn} - Jugador: ${activePlayer}`}</p>
       {winner === '' ? <Board /> : <p>{`Ganador: Jugador ${winner}`}</p>}
 
-      <button onClick={changeTurn}>Fin del turno</button>
+      <Button
+        variant='danger'
+        onClick={changeTurn}
+      >
+        Fin del turno
+      </Button>
     </>
   )
 }

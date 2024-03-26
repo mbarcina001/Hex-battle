@@ -1,4 +1,4 @@
-import './Hex.css'
+import './Hex.scss'
 
 export default function Hex ({ id, type, isSelected, setAsSelected }) {
   function handleHexClick () {
