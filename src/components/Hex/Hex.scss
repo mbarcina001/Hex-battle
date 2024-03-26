@@ -5,15 +5,15 @@
   display: inline-block;
   border: 5px solid black;
 
-  .selected {
+  &.selected {
     border: 5px solid lightblue;
   }
   
-  .plain {
+  &.plain {
     background-color: green;
   }
   
-  .desert {
+  &.desert {
     background-color: brown;
   }
 }
