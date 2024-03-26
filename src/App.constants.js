@@ -1,16 +1,34 @@
 export const BOARD_TYPES = [
   [
-    'plain',
-    'plain',
-    'plain'
+    'grass',
+    'grass',
+    'grass'
   ],
   [
-    'plain',
-    'plain',
-    'plain'
+    'grass',
+    'grass',
+    'grass',
+    'grass',
+    'grass'
   ],
   [
-    'plain',
+    'grass',
+    'grass',
+    'grass',
+    'grass',
+    'grass',
+    'grass',
+    'desert'
+  ],
+  [
+    'grass',
+    'grass',
+    'desert',
+    'desert',
+    'desert'
+  ],
+  [
+    'grass',
     'desert',
     'desert'
   ]

@@ -1,14 +1,17 @@
 import './Hex.scss'
 
-export default function Hex ({ id, type, isSelected, setAsSelected }) {
+export default function Hex ({ id, type, isSelected, pnjInHex, cityInHex, setAsSelected }) {
   function handleHexClick () {
     setAsSelected(id)
   }
 
   return (
     <div
-      className={`hex ${isSelected ? 'selected' : ''} ${type}`}
+      className={`hex ${type} ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
-    />
+    >
+      {pnjInHex ? <span>{pnjInHex.id}</span> : ''}
+      {cityInHex ? <span>{cityInHex.id}</span> : ''}
+    </div>
   )
 }

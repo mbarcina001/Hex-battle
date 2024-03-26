@@ -4,12 +4,13 @@
   margin: 2px;
   display: inline-block;
   border: 5px solid black;
+  border-radius: 100px;
 
   &.selected {
     border: 5px solid lightblue;
   }
   
-  &.plain {
+  &.grass {
     background-color: green;
   }
   
