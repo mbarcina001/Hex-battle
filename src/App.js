@@ -7,20 +7,10 @@ function App () {
   const [actualTurn, setActualTurn] = useState(1)
   const [activePlayer, setActivePlayer] = useState(1)
   const [winner, setWinner] = useState('')
-
-  const players = [
-    {
-      id: 1,
-      visibleHexs: [] // TODO
-    },
-    {
-      id: 2,
-      visibleHexs: [] // TODO
-    }
-  ]
+  const playerCount = 2
 
   function changeTurn () {
-    if (activePlayer === players.length) {
+    if (activePlayer === playerCount) {
       const newTurn = actualTurn + 1
 
       // TODO: Remove
@@ -40,7 +30,7 @@ function App () {
   function getMainContent () {
     if (winner === '') {
       return (
-        <Board activePlayer={activePlayer} />
+        <Board activePlayer={activePlayer} turn={actualTurn} />
       )
     }
 
