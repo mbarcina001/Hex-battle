@@ -196,6 +196,21 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
    */
   function movePnj (pnjToMove: PnjToMove, locationToMove: string) {
     pnjToMove.hexLocationId = locationToMove
+    addNewVisibleHexsAfterMovement(locationToMove)
+  }
+
+  function addNewVisibleHexsAfterMovement (newLocation: string) {
+    const playerVisibleHexs = visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)
+
+    if (!playerVisibleHexs?.visibleHexsIds) {
+      return // TODO: Ok esto?
+    }
+
+    for (const hexId of getAdjacentHexIds(newLocation, board)) {
+      if (!playerVisibleHexs.visibleHexsIds.includes(hexId)) {
+        playerVisibleHexs.visibleHexsIds.push(hexId)
+      }
+    }
   }
 
   /**

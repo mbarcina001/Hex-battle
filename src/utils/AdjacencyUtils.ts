@@ -48,12 +48,12 @@ export function getAdjacentHexIds (hexId: string, board: string[][]): string[] {
 function _getHorizontalAdjacentCoords (coords: Coords): Coords[] {
   return [
     {
-      x: coords.x - 1,
-      y: coords.y
+      x: coords.x,
+      y: coords.y - 1
     },
     {
-      x: coords.x + 1,
-      y: coords.y
+      x: coords.x,
+      y: coords.y + 1
     }
   ]
 }
@@ -66,12 +66,12 @@ function _getHorizontalAdjacentCoords (coords: Coords): Coords[] {
 function _getVerticalAdjacentCoords (coords: Coords): Coords[] {
   return [
     {
-      x: coords.x,
-      y: coords.y - 1
+      x: coords.x - 1,
+      y: coords.y
     },
     {
-      x: coords.x,
-      y: coords.y + 1
+      x: coords.x + 1,
+      y: coords.y
     }
   ]
 }
@@ -83,7 +83,22 @@ function _getVerticalAdjacentCoords (coords: Coords): Coords[] {
  * @returns {Coords[]}
  */
 function _getDiagonalAdjacentCoords (coords: Coords, board: string[][]): Coords[] {
-  if (board.length / 2 < coords.y) {
+  const mapHeight = board.length
+  const middleRow = Math.floor(mapHeight / 2)
+  console.log(middleRow)
+
+  if (coords.y < middleRow) {
+    return [
+      {
+        x: coords.x - 1,
+        y: coords.y - 1
+      },
+      {
+        x: coords.x + 1,
+        y: coords.y + 1
+      }
+    ]
+  } else if (coords.y > middleRow) {
     return [
       {
         x: coords.x + 1,
@@ -94,17 +109,18 @@ function _getDiagonalAdjacentCoords (coords: Coords, board: string[][]): Coords[
         y: coords.y + 1
       }
     ]
+  } else {
+    return [
+      {
+        x: coords.x - 1,
+        y: coords.y - 1
+      },
+      {
+        x: coords.x - 1,
+        y: coords.y + 1
+      }
+    ]
   }
-  return [
-    {
-      x: coords.x - 1,
-      y: coords.y - 1
-    },
-    {
-      x: coords.x + 1,
-      y: coords.y + 1
-    }
-  ]
 }
 
 /**
