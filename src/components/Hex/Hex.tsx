@@ -1,6 +1,18 @@
 import './Hex.scss'
+import React from 'react'
 
-export default function Hex ({ id, type, isSelected, isVisible, isDestinationHex, pnjInHex, cityInHex, setAsSelected }) {
+interface HexProps {
+  id: string,
+  type: string,
+  isSelected: boolean,
+  isVisible: boolean,
+  isDestinationHex: boolean,
+  pnjInHex: any,
+  cityInHex: any,
+  setAsSelected: Function
+}
+
+const Hex:React.FC<HexProps> = ({ id, type, isSelected, isVisible, isDestinationHex, pnjInHex, cityInHex, setAsSelected }) => {
   /**
    * Handles click event
    * Sets this Hex as selected if it is visible for active player
@@ -21,3 +33,5 @@ export default function Hex ({ id, type, isSelected, isVisible, isDestinationHex
     </div>
   )
 }
+
+export default Hex

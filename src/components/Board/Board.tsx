@@ -1,18 +1,51 @@
-import { useEffect, useState } from 'react'
-import Hex from '../Hex/Hex'
-import { BOARD_TYPES } from '../../App.constants'
+import React, { useEffect, useState } from 'react'
 import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+
+import Hex from '../Hex/Hex'
+import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
+
+import { BOARD_TYPES } from '../../App.constants'
+
 import * as _ from 'lodash'
 
-export default function Board ({ activePlayer, turn }) {
-  const [board, setBoard] = useState(undefined)
-  const [selectedHexId, setSelectedHexId] = useState('')
-  const [pnjList, setPnjList] = useState([])
-  const [cityList, setCityList] = useState([])
-  const [movingPnj, setMovingPnj] = useState(undefined)
-  const [visibleHexsByPlayer, setVisibleHexsByPlayer] = useState([])
+interface BoardProps {
+  activePlayer: number,
+  turn: number
+}
+
+export interface Pnj {
+  type: string,
+  id: string,
+  owner: number,
+  canMove: boolean,
+  hexLocationId: string
+}
+
+export interface PnjToMove extends Pnj {
+  destinationHexs: string[]
+}
+
+export interface City {
+  name: string,
+  id: string,
+  owner: number,
+  hexLocationId: string
+}
+
+export interface VisibleHexsByPlayer {
+  playerId: number,
+  visibleHexsIds: string[]
+}
+
+const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
+  const [board, setBoard] = useState<string[][]>([])
+  const [selectedHexId, setSelectedHexId] = useState<string>('')
+  const [pnjList, setPnjList] = useState<Pnj[]>([])
+  const [cityList, setCityList] = useState<City[]>([])
+  const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
+  const [visibleHexsByPlayer, setVisibleHexsByPlayer] = useState<VisibleHexsByPlayer[]>([])
 
   useEffect(() => {
     initializeBoard()
@@ -57,13 +90,13 @@ export default function Board ({ activePlayer, turn }) {
    *  Adds first city at a random location
    */
   function initializeCityList () {
-    const initialCityPlayer1 = {
+    const initialCityPlayer1: City = {
       id: 'cit_0',
       name: 'City A',
       owner: 1,
       hexLocationId: getRandomHexLocationId()
     }
-    const initialCityPlayer2 = {
+    const initialCityPlayer2: City = {
       id: 'cit_1',
       name: 'City B',
       owner: 2,
@@ -77,20 +110,21 @@ export default function Board ({ activePlayer, turn }) {
    *  Adds first PNJ in player's first city
    */
   function initializePnjList () {
-    const initialPnjPlayer1 = {
+    const initialPnjPlayer1: Pnj = {
       type: 'any',
       id: 'pnj_0',
       owner: 1,
-      hexLocationId: cityList[0].hexLocationId
+      hexLocationId: cityList[0].hexLocationId,
+      canMove: false
     }
-    const initialPnjPlayer2 = {
+    const initialPnjPlayer2: Pnj = {
       type: 'any',
       id: 'pnj_1',
       owner: 2,
-      hexLocationId: cityList[1].hexLocationId
+      hexLocationId: cityList[1].hexLocationId,
+      canMove: false
     }
-    const pnjInitialList = [initialPnjPlayer1, initialPnjPlayer2]
-    setPnjList(pnjInitialList)
+    setPnjList([initialPnjPlayer1, initialPnjPlayer2])
   }
 
   /**
@@ -98,16 +132,15 @@ export default function Board ({ activePlayer, turn }) {
    *  Adds to visible hex list those hexs that player's first pnj can see
    */
   function initializeActivePlayerVisibleHexs () {
-    const playerVisibleHexs = {
+    const playerVisibleHexs: VisibleHexsByPlayer = {
       playerId: activePlayer,
-      visibleHexs: []
+      visibleHexsIds: []
     }
 
     for (const pnj of pnjList) {
       if (pnj.owner === activePlayer) {
-        playerVisibleHexs.visibleHexs = playerVisibleHexs.visibleHexs
-          .concat(getPnjAdjacentHexs(pnj))
-          .concat(pnj.hexLocationId)
+        playerVisibleHexs.visibleHexsIds = playerVisibleHexs.visibleHexsIds
+          .concat(getAdjacentHexIds(pnj.hexLocationId, board), pnj.hexLocationId)
       }
     }
 
@@ -119,9 +152,9 @@ export default function Board ({ activePlayer, turn }) {
   /**
    * Gets hex's occupant pnj if any
    * @param {string} hexId
-   * @returns {any}
+   * @returns {Pnj | undefined}
    */
-  function getPnjInHex (hexId) {
+  function getPnjInHex (hexId: string): Pnj | undefined {
     for (const pnj of pnjList) {
       if (pnj.hexLocationId === hexId) {
         return pnj
@@ -134,7 +167,7 @@ export default function Board ({ activePlayer, turn }) {
    * @param {string} hexId
    * @returns {any}
    */
-  function getCityInHex (hexId) {
+  function getCityInHex (hexId: string) {
     for (const city of cityList) {
       if (city.hexLocationId === hexId) {
         return city
@@ -152,21 +185,24 @@ export default function Board ({ activePlayer, turn }) {
     return `${xCoord}_${yCoord}`
   }
 
-  function getRandomInt (max) {
+  function getRandomInt (max: number) {
     return Math.floor(Math.random() * max)
   }
 
   /**
    * Moves received pnj to received location
+   * @param {PnjToMove} pnjToMove
+   * @param {string} locationToMove
    */
-  function movePnj (pnjToMove, locationToMove) {
+  function movePnj (pnjToMove: PnjToMove, locationToMove: string) {
     pnjToMove.hexLocationId = locationToMove
   }
 
   /**
    * Sets pnj to move next
+   * @param {Pnj} pnjToMove
    */
-  function selectPnjToMove (pnjToMove) {
+  function selectPnjToMove (pnjToMove: Pnj) {
     setMovingPnj(Object.assign(pnjToMove, {
       destinationHexs: getPnjAdjacentHexs(pnjToMove)
     }))
@@ -197,97 +233,19 @@ export default function Board ({ activePlayer, turn }) {
 
   /**
    * Given a pnj returns an array with ids of its adjacent hexs
-   * @param {any} pnjInHex
-   * @returns {any}
+   * @param {Pnj} pnjInHex
+   * @returns {string[]}
    */
-  function getPnjAdjacentHexs (pnjInHex) {
-    const coords = getPnjCoords(pnjInHex)
-    return getAdjacentCoords(coords)
+  function getPnjAdjacentHexs (pnjInHex: Pnj): string[] {
+    return getAdjacentHexIds(pnjInHex.hexLocationId, board)
   }
 
-  /**
-   * Ggiven a pnj returns its coords
-   * @param {any} pnj
-   * @returns {any}
-   */
-  function getPnjCoords (pnj) {
-    return {
-      x: parseInt(pnj.hexLocationId.split('_')[0]),
-      y: parseInt(pnj.hexLocationId.split('_')[1])
-    }
-  }
-
-  /**
-   * Given a hex coords returns adjacent hexs coords
-   * @param {any} coords
-   * @returns {any}
-   */
-  function getAdjacentCoords (coords) {
-    const adjacentCoords = []
-      .concat(getHorizontalAdjacentCoords(coords))
-      .concat(getVerticalAdjacentCoords(coords))
-      .concat(getDiagonalAdjacentCoords(coords))
-    return adjacentCoords.filter(coords => checkCoordsInBoardBoundaries(coords))
-  }
-
-  function checkCoordsInBoardBoundaries (coords) {
-    const splittedCoords = {
-      x: coords.split('_')[0],
-      y: coords.split('_')[1]
-    }
-    if (splittedCoords.x < 0 || splittedCoords.y < 0) {
-      return false
-    }
-  }
-
-  /**
-   * Given a hex coords returns adjacent hexs coords in y axis
-   * @param {any} coords
-   * @returns {any}
-   */
-  function getHorizontalAdjacentCoords (coords) {
-    return [
-      `${coords.x - 1}_${coords.y}`,
-      `${coords.x + 1}_${coords.y}`
-    ]
-  }
-
-  /**
-   * Given a hex coords returns adjacent hexs coords in x axis
-   * @param {any} coords
-   * @returns {any}
-   */
-  function getVerticalAdjacentCoords (coords) {
-    return [
-      `${coords.x}_${coords.y - 1}`,
-      `${coords.x}_${coords.y + 1}`
-    ]
-  }
-
-  /**
-   * Given a hex coords returns adjacent hexs coords in diagonal
-   * @param {any} coords
-   * @returns {any}
-   */
-  function getDiagonalAdjacentCoords (coords) {
-    if (board.length / 2 < coords.y) {
-      return [
-        `${coords.x + 1}_${coords.y - 1}`,
-        `${coords.x - 1}_${coords.y + 1}`
-      ]
-    }
-    return [
-      `${coords.x - 1}_${coords.y - 1}`,
-      `${coords.x + 1}_${coords.y + 1}`
-    ]
-  }
-
-  function isHexVisible (hexId) {
+  function isHexVisible (hexId: string): boolean {
     return getActivePlayerVisibleHexs().includes(hexId)
   }
 
   function getActivePlayerVisibleHexs () {
-    return visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)?.visibleHexs || []
+    return visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)?.visibleHexsIds || []
   }
 
   return (
@@ -301,7 +259,7 @@ export default function Board ({ activePlayer, turn }) {
                 type={boardHexType}
                 isSelected={selectedHexId === `${jdx}_${idx}`}
                 isVisible={isHexVisible(`${jdx}_${idx}`)}
-                isDestinationHex={movingPnj?.destinationHexs?.includes(`${jdx}_${idx}`)}
+                isDestinationHex={movingPnj?.destinationHexs?.includes(`${jdx}_${idx}`) ?? false}
                 pnjInHex={getPnjInHex(`${jdx}_${idx}`)}
                 cityInHex={getCityInHex(`${jdx}_${idx}`)}
                 setAsSelected={setSelectedHexId}
@@ -313,3 +271,5 @@ export default function Board ({ activePlayer, turn }) {
     </Container>
   )
 }
+
+export default Board

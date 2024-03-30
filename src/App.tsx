@@ -1,12 +1,12 @@
 import './App.scss'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import Board from './components/Board/Board'
 import Button from 'react-bootstrap/Button'
 
-function App () {
-  const [actualTurn, setActualTurn] = useState(1)
-  const [activePlayer, setActivePlayer] = useState(1)
-  const [winner, setWinner] = useState('')
+const App: React.FC = () => {
+  const [actualTurn, setActualTurn] = useState<number>(1)
+  const [activePlayer, setActivePlayer] = useState<number>(1)
+  const [winner, setWinner] = useState<number | undefined>(undefined)
   const playerCount = 2
 
   function changeTurn () {
@@ -28,13 +28,13 @@ function App () {
   }
 
   function getMainContent () {
-    if (winner === '') {
-      return (
-        <Board activePlayer={activePlayer} turn={actualTurn} />
-      )
+    if (winner) {
+      return <p>{`Ganador: Jugador ${winner}`}</p>
     }
 
-    return <p>{`Ganador: Jugador ${winner}`}</p>
+    return (
+      <Board activePlayer={activePlayer} turn={actualTurn} />
+    )
   }
 
   return (
