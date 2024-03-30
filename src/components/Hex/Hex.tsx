@@ -1,3 +1,5 @@
+import CityComp, { City } from '../City/City'
+import PnjComp, { Pnj } from '../Pnj/Pnj'
 import './Hex.scss'
 import React from 'react'
 
@@ -7,8 +9,8 @@ interface HexProps {
   isSelected: boolean,
   isVisible: boolean,
   isDestinationHex: boolean,
-  pnjInHex: any,
-  cityInHex: any,
+  pnjInHex?: Pnj,
+  cityInHex?: City,
   setAsSelected: Function
 }
 
@@ -28,8 +30,8 @@ const Hex:React.FC<HexProps> = ({ id, type, isSelected, isVisible, isDestination
       className={`hex ${isVisible ? type : 'ofuscated'} ${isDestinationHex ? 'destination' : ''} ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
     >
-      {pnjInHex && isVisible ? <p className='mb-0'>{pnjInHex.id}</p> : ''}
-      {cityInHex && isVisible ? <p className='mb-0'>{cityInHex.id}</p> : ''}
+      {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
+      {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
     </div>
   )
 }

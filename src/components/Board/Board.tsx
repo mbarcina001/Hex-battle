@@ -9,29 +9,16 @@ import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
 import { BOARD_TYPES } from '../../App.constants'
 
 import * as _ from 'lodash'
+import { Pnj } from '../Pnj/Pnj'
+import { City } from '../City/City'
 
 interface BoardProps {
   activePlayer: number,
   turn: number
 }
 
-export interface Pnj {
-  type: string,
-  id: string,
-  owner: number,
-  canMove: boolean,
-  hexLocationId: string
-}
-
 export interface PnjToMove extends Pnj {
   destinationHexs: string[]
-}
-
-export interface City {
-  name: string,
-  id: string,
-  owner: number,
-  hexLocationId: string
 }
 
 export interface VisibleHexsByPlayer {
@@ -77,6 +64,13 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pnjList, activePlayer, turn])
+
+  useEffect(() => {
+    if (pnjList?.length && activePlayer) {
+      setPlayerPnjsActive()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pnjList, activePlayer])
 
   /**
    * Auxiliar function that initializes board
@@ -197,18 +191,27 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
   function movePnj (pnjToMove: PnjToMove, locationToMove: string) {
     pnjToMove.hexLocationId = locationToMove
     addNewVisibleHexsAfterMovement(locationToMove)
+    pnjToMove.canMove = false
   }
 
   function addNewVisibleHexsAfterMovement (newLocation: string) {
     const playerVisibleHexs = visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)
 
     if (!playerVisibleHexs?.visibleHexsIds) {
-      return // TODO: Ok esto?
+      return
     }
 
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
       if (!playerVisibleHexs.visibleHexsIds.includes(hexId)) {
         playerVisibleHexs.visibleHexsIds.push(hexId)
+      }
+    }
+  }
+
+  function setPlayerPnjsActive () {
+    for (const pnj of pnjList) {
+      if (pnj.owner === activePlayer) {
+        pnj.canMove = true
       }
     }
   }
@@ -229,7 +232,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
    */
   function triggerSelectedHexActions () {
     // MOVE PNJ TO DESTINATION
-    if (movingPnj?.destinationHexs?.includes(selectedHexId)) {
+    if (movingPnj?.canMove && movingPnj?.destinationHexs?.includes(selectedHexId)) {
       movePnj(movingPnj, selectedHexId)
       setSelectedHexId('')
       setMovingPnj(undefined)
