@@ -17,6 +17,14 @@
     border-color: blue;
   }
 
+  &.enemy {
+    border-color: red;
+  }
+
+  &.ally {
+    border-color: green;
+  }
+
   &.ofuscated {
     background-color: grey;
   }

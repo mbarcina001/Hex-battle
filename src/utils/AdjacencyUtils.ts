@@ -1,3 +1,5 @@
+import { Hex } from '../components/Hex/Hex'
+
 export interface Coords {
   x: number,
   y: number
@@ -27,10 +29,10 @@ export function parseHexIdFromCoords (coords: Coords): string {
 /**
    * Given a hex coords returns adjacent hexs coords
    * @param {string} hexId
-   * @param {string[][]} board
+   * @param {Hex[][]} board
    * @returns {string[]}
    */
-export function getAdjacentHexIds (hexId: string, board: string[][]): string[] {
+export function getAdjacentHexIds (hexId: string, board: Hex[][]): string[] {
   const coords = parseCoordsFromHexId(hexId)
   let adjacentCoords: Coords[] = _getHorizontalAdjacentCoords(coords).concat(
     _getVerticalAdjacentCoords(coords),
@@ -79,13 +81,12 @@ function _getVerticalAdjacentCoords (coords: Coords): Coords[] {
 /**
  * Given a hex coords returns adjacent hexs coords in diagonal
  * @param {Coords} coords
-   * @param {string[][]} board
+   * @param {Hex[][]} board
  * @returns {Coords[]}
  */
-function _getDiagonalAdjacentCoords (coords: Coords, board: string[][]): Coords[] {
+function _getDiagonalAdjacentCoords (coords: Coords, board: Hex[][]): Coords[] {
   const mapHeight = board.length
   const middleRow = Math.floor(mapHeight / 2)
-  console.log(middleRow)
 
   if (coords.y < middleRow) {
     return [

@@ -3,8 +3,10 @@ import Container from 'react-bootstrap/Container'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
-import Hex from '../Hex/Hex'
+import HexComp, { Hex } from '../Hex/Hex'
+
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
+import { isPnjEnemy, isPnjAlly } from '../../utils/PnjUtils'
 
 import { BOARD_TYPES } from '../../App.constants'
 
@@ -27,8 +29,8 @@ export interface VisibleHexsByPlayer {
 }
 
 const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
-  const [board, setBoard] = useState<string[][]>([])
-  const [selectedHexId, setSelectedHexId] = useState<string>('')
+  const [board, setBoard] = useState<Hex[][]>([])
+  const [selectedHex, setSelectedHex] = useState<string>('')
   const [pnjList, setPnjList] = useState<Pnj[]>([])
   const [cityList, setCityList] = useState<City[]>([])
   const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
@@ -56,7 +58,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
   useEffect(() => {
     triggerSelectedHexActions()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedHexId])
+  }, [selectedHex])
 
   useEffect(() => {
     if (pnjList?.length && activePlayer && turn === 1) {
@@ -76,7 +78,21 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
    * Auxiliar function that initializes board
    */
   function initializeBoard () {
-    setBoard(BOARD_TYPES)
+    const board: Hex[][] = []
+    BOARD_TYPES.forEach((_, idx) => {
+      const row: Hex[] = []
+
+      BOARD_TYPES[idx].forEach((_, jdx) => {
+        row.push({
+          id: `${jdx}_${idx}`,
+          type: BOARD_TYPES[idx][jdx]
+        })
+      })
+
+      board.push(row)
+    })
+
+    setBoard(board)
   }
 
   /**
@@ -132,7 +148,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
     }
 
     for (const pnj of pnjList) {
-      if (pnj.owner === activePlayer) {
+      if (isPnjAlly(pnj, activePlayer)) {
         playerVisibleHexs.visibleHexsIds = playerVisibleHexs.visibleHexsIds
           .concat(getAdjacentHexIds(pnj.hexLocationId, board), pnj.hexLocationId)
       }
@@ -210,7 +226,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
 
   function setPlayerPnjsActive () {
     for (const pnj of pnjList) {
-      if (pnj.owner === activePlayer) {
+      if (isPnjAlly(pnj, activePlayer)) {
         pnj.canMove = true
       }
     }
@@ -231,22 +247,68 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
    *  - Show destination nodes if pnj is in hex
    */
   function triggerSelectedHexActions () {
-    // MOVE PNJ TO DESTINATION
-    if (movingPnj?.canMove && movingPnj?.destinationHexs?.includes(selectedHexId)) {
-      movePnj(movingPnj, selectedHexId)
-      setSelectedHexId('')
+    console.log('triggerSelectedHexActions')
+    const pnjInDestinationHex = getPnjInHex(selectedHex)
+
+    if (movingPnj?.canMove && movingPnj?.destinationHexs?.includes(selectedHex)) {
+      if (pnjInDestinationHex && isPnjAlly(pnjInDestinationHex, activePlayer)) {
+        healPnj(pnjInDestinationHex)
+        return
+      }
+
+      // ATACK
+      if (pnjInDestinationHex && isPnjEnemy(pnjInDestinationHex, activePlayer)) {
+        attackPnj(movingPnj, pnjInDestinationHex)
+        return
+      }
+
+      // MOVE PNJ TO DESTINATION
+      movePnj(movingPnj, selectedHex)
+      setSelectedHex('')
       setMovingPnj(undefined)
       return
     }
 
     // SELECT PNJ TO MOVE
-    const pnjInHex = getPnjInHex(selectedHexId)
-    if (pnjInHex?.hexLocationId) {
-      selectPnjToMove(pnjInHex)
+    if (pnjInDestinationHex?.hexLocationId) {
+      selectPnjToMove(pnjInDestinationHex)
       return
     }
 
     setMovingPnj(undefined)
+  }
+
+  /**
+   * Heals received pnj
+   * @param {Pnj} pnjInDestinationHex
+   */
+  function healPnj (pnjInDestinationHex: Pnj) {
+    // TODO
+  }
+
+  /**
+   * Attacks received pnj
+   * @param {Pnj} attackingPnj
+   * @param {Pnj} attackedPnj
+   */
+  function attackPnj (attackingPnj: PnjToMove, attackedPnj: Pnj) {
+    // TODO: Reduce heal & kill if heal === 0
+    killPnj(attackedPnj)
+    movePnj(attackingPnj, selectedHex)
+  }
+
+  /**
+   * Kills received pnj
+   * @param {Pnj} pnjInDestinationHex
+   */
+  function killPnj (pnjInDestinationHex: Pnj) {
+    const pnjListCopy = _.cloneDeep(pnjList)
+    const pnjIndex = pnjListCopy.findIndex(pnj => pnj.id === pnjInDestinationHex.id)
+
+    if (pnjIndex >= 0) {
+      pnjListCopy.splice(pnjIndex, 1)
+    }
+    setPnjList(pnjListCopy)
   }
 
   /**
@@ -270,17 +332,17 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
     <Container>
       {board?.map((boardRow, idx) => (
         <Row className='justify-content-md-center' key={idx}>
-          {boardRow.map((boardHexType, jdx) => (
+          {boardRow.map((_, jdx) => (
             <Col key={`${jdx}_${idx}`} xs lg='1'>
-              <Hex
-                id={`${jdx}_${idx}`}
-                type={boardHexType}
-                isSelected={selectedHexId === `${jdx}_${idx}`}
+              <HexComp
+                hex={board[idx][jdx]}
+                isSelected={selectedHex === `${jdx}_${idx}`}
                 isVisible={isHexVisible(`${jdx}_${idx}`)}
                 isDestinationHex={movingPnj?.destinationHexs?.includes(`${jdx}_${idx}`) ?? false}
                 pnjInHex={getPnjInHex(`${jdx}_${idx}`)}
                 cityInHex={getCityInHex(`${jdx}_${idx}`)}
-                setAsSelected={setSelectedHexId}
+                setAsSelected={setSelectedHex}
+                activePlayer={activePlayer}
               />
             </Col>
           ))}

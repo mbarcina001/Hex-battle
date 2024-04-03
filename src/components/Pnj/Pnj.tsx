@@ -1,5 +1,6 @@
+import { isPnjAlly } from '../../utils/PnjUtils'
 import './Pnj.scss'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 export interface Pnj {
   type: string,
@@ -10,12 +11,20 @@ export interface Pnj {
 }
 
 interface PnjCompProps {
-  pnj: Pnj
+  pnj: Pnj,
+  activePlayer: number
 }
 
-const PnjComp:React.FC<PnjCompProps> = ({ pnj }) => {
+const PnjComp:React.FC<PnjCompProps> = ({ pnj, activePlayer }) => {
+  const [inactivePnj, setInactivePnj] = useState<boolean>(true)
+
+  useEffect(() => {
+    const inactivePnj = !pnj.canMove && isPnjAlly(pnj, activePlayer)
+    setInactivePnj(inactivePnj)
+  }, [pnj, pnj.canMove, activePlayer])
+
   return (
-    <span className={`${pnj.canMove ? '' : 'inactive'}`}>{pnj.id}</span>
+    <span className={`${inactivePnj ? 'inactive' : ''}`}>{pnj.id}</span>
   )
 }
 
