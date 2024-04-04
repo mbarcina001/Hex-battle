@@ -4,6 +4,10 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 import HexComp, { Hex } from '../Hex/Hex'
+import { Pnj } from '../Pnj/Pnj'
+import { City } from '../City/City'
+
+import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
 
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
 import { isPnjEnemy, isPnjAlly } from '../../utils/PnjUtils'
@@ -11,11 +15,8 @@ import { isPnjEnemy, isPnjAlly } from '../../utils/PnjUtils'
 import { BOARD_TYPES } from '../../App.constants'
 
 import * as _ from 'lodash'
-import { Pnj } from '../Pnj/Pnj'
-import { City } from '../City/City'
 
 interface BoardProps {
-  activePlayer: number,
   turn: number
 }
 
@@ -28,13 +29,15 @@ export interface VisibleHexsByPlayer {
   visibleHexsIds: string[]
 }
 
-const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
+const Board:React.FC<BoardProps> = ({ turn }) => {
   const [board, setBoard] = useState<Hex[][]>([])
   const [selectedHex, setSelectedHex] = useState<string>('')
   const [pnjList, setPnjList] = useState<Pnj[]>([])
   const [cityList, setCityList] = useState<City[]>([])
   const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
   const [visibleHexsByPlayer, setVisibleHexsByPlayer] = useState<VisibleHexsByPlayer[]>([])
+
+  const activePlayer = useActivePlayerContext()
 
   useEffect(() => {
     initializeBoard()
@@ -142,8 +145,12 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
    *  Adds to visible hex list those hexs that player's first pnj can see
    */
   function initializeActivePlayerVisibleHexs () {
+    if (!activePlayer?.playerId) {
+      return
+    }
+
     const playerVisibleHexs: VisibleHexsByPlayer = {
-      playerId: activePlayer,
+      playerId: activePlayer.playerId,
       visibleHexsIds: []
     }
 
@@ -211,7 +218,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
   }
 
   function addNewVisibleHexsAfterMovement (newLocation: string) {
-    const playerVisibleHexs = visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)
+    const playerVisibleHexs = visibleHexsByPlayer.find(elem => elem.playerId === activePlayer.playerId)
 
     if (!playerVisibleHexs?.visibleHexsIds) {
       return
@@ -325,7 +332,7 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
   }
 
   function getActivePlayerVisibleHexs () {
-    return visibleHexsByPlayer.find(elem => elem.playerId === activePlayer)?.visibleHexsIds || []
+    return visibleHexsByPlayer.find(elem => elem.playerId === activePlayer.playerId)?.visibleHexsIds || []
   }
 
   return (
@@ -342,7 +349,6 @@ const Board:React.FC<BoardProps> = ({ activePlayer, turn }) => {
                 pnjInHex={getPnjInHex(`${jdx}_${idx}`)}
                 cityInHex={getCityInHex(`${jdx}_${idx}`)}
                 setAsSelected={setSelectedHex}
-                activePlayer={activePlayer}
               />
             </Col>
           ))}

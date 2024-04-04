@@ -1,3 +1,5 @@
+import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
+import { isPnjAlly } from '../../utils/PnjUtils'
 import CityComp, { City } from '../City/City'
 import PnjComp, { Pnj } from '../Pnj/Pnj'
 import './Hex.scss'
@@ -16,10 +18,11 @@ interface HexProps {
   pnjInHex?: Pnj,
   cityInHex?: City,
   setAsSelected: Function,
-  activePlayer: number
 }
 
-const HexComp:React.FC<HexProps> = ({ hex, isSelected, isVisible, isDestinationHex, pnjInHex, cityInHex, setAsSelected, activePlayer }) => {
+const HexComp:React.FC<HexProps> = ({ hex, isSelected, isVisible, isDestinationHex, pnjInHex, cityInHex, setAsSelected }) => {
+  const activePlayer = useActivePlayerContext()
+
   /**
    * Handles click event
    * Sets this Hex as selected if it is visible for active player
@@ -32,7 +35,7 @@ const HexComp:React.FC<HexProps> = ({ hex, isSelected, isVisible, isDestinationH
 
   function getBorderColorClass () {
     if (isDestinationHex && pnjInHex) {
-      if (pnjInHex.owner === activePlayer) {
+      if (isPnjAlly(pnjInHex, activePlayer)) {
         return 'ally'
       }
 
@@ -51,7 +54,7 @@ const HexComp:React.FC<HexProps> = ({ hex, isSelected, isVisible, isDestinationH
       className={`hex ${isVisible ? hex.type : 'ofuscated'} ${getBorderColorClass()} ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
     >
-      {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} activePlayer={activePlayer} /> : ''}
+      {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
       {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
     </div>
   )
