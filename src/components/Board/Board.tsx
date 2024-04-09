@@ -5,19 +5,17 @@ import Col from 'react-bootstrap/Col'
 
 import HexComp, { Hex } from '../Hex/Hex'
 import { Pnj } from '../Pnj/Pnj'
-import { City } from '../City/City'
 
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
 
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
 import { isPnjEnemy, isPnjAlly } from '../../utils/PnjUtils'
 
-import { BOARD_TYPES } from '../../App.constants'
-
-import * as _ from 'lodash'
+import { Player } from '../../App'
 
 interface BoardProps {
-  turn: number
+  board: Hex[][];
+  playerList: Player[]
 }
 
 export interface PnjToMove extends Pnj {
@@ -29,142 +27,16 @@ export interface VisibleHexsByPlayer {
   visibleHexsIds: string[]
 }
 
-const Board:React.FC<BoardProps> = ({ turn }) => {
-  const [board, setBoard] = useState<Hex[][]>([])
+const Board:React.FC<BoardProps> = ({ board, playerList }) => {
   const [selectedHex, setSelectedHex] = useState<string>('')
-  const [pnjList, setPnjList] = useState<Pnj[]>([])
-  const [cityList, setCityList] = useState<City[]>([])
   const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
-  const [visibleHexsByPlayer, setVisibleHexsByPlayer] = useState<VisibleHexsByPlayer[]>([])
 
   const activePlayer = useActivePlayerContext()
-
-  useEffect(() => {
-    initializeBoard()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (board?.length) {
-      initializeCityList()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [board])
-
-  useEffect(() => {
-    if (cityList?.length) {
-      initializePnjList()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cityList])
 
   useEffect(() => {
     triggerSelectedHexActions()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedHex])
-
-  useEffect(() => {
-    if (pnjList?.length && activePlayer && turn === 1) {
-      initializeActivePlayerVisibleHexs()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pnjList, activePlayer, turn])
-
-  useEffect(() => {
-    if (pnjList?.length && activePlayer) {
-      setPlayerPnjsActive()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pnjList, activePlayer])
-
-  /**
-   * Auxiliar function that initializes board
-   */
-  function initializeBoard () {
-    const board: Hex[][] = []
-    BOARD_TYPES.forEach((_, idx) => {
-      const row: Hex[] = []
-
-      BOARD_TYPES[idx].forEach((_, jdx) => {
-        row.push({
-          id: `${jdx}_${idx}`,
-          type: BOARD_TYPES[idx][jdx]
-        })
-      })
-
-      board.push(row)
-    })
-
-    setBoard(board)
-  }
-
-  /**
-   * Auxiliar function that initializes player's city list
-   *  Adds first city at a random location
-   */
-  function initializeCityList () {
-    const initialCityPlayer1: City = {
-      id: 'cit_0',
-      name: 'City A',
-      owner: 1,
-      hexLocationId: getRandomHexLocationId()
-    }
-    const initialCityPlayer2: City = {
-      id: 'cit_1',
-      name: 'City B',
-      owner: 2,
-      hexLocationId: getRandomHexLocationId()
-    }
-    setCityList([initialCityPlayer1, initialCityPlayer2])
-  }
-
-  /**
-   * Auxiliar function that initializes player's pnj list
-   *  Adds first PNJ in player's first city
-   */
-  function initializePnjList () {
-    const initialPnjPlayer1: Pnj = {
-      type: 'any',
-      id: 'pnj_0',
-      owner: 1,
-      hexLocationId: cityList[0].hexLocationId,
-      canMove: false
-    }
-    const initialPnjPlayer2: Pnj = {
-      type: 'any',
-      id: 'pnj_1',
-      owner: 2,
-      hexLocationId: cityList[1].hexLocationId,
-      canMove: false
-    }
-    setPnjList([initialPnjPlayer1, initialPnjPlayer2])
-  }
-
-  /**
-   * Auxiliar function that initializes active player's visible hexs
-   *  Adds to visible hex list those hexs that player's first pnj can see
-   */
-  function initializeActivePlayerVisibleHexs () {
-    if (!activePlayer?.playerId) {
-      return
-    }
-
-    const playerVisibleHexs: VisibleHexsByPlayer = {
-      playerId: activePlayer.playerId,
-      visibleHexsIds: []
-    }
-
-    for (const pnj of pnjList) {
-      if (isPnjAlly(pnj, activePlayer)) {
-        playerVisibleHexs.visibleHexsIds = playerVisibleHexs.visibleHexsIds
-          .concat(getAdjacentHexIds(pnj.hexLocationId, board), pnj.hexLocationId)
-      }
-    }
-
-    const visibleHexsByPlayerCopy = _.cloneDeep(visibleHexsByPlayer)
-    visibleHexsByPlayerCopy.push(playerVisibleHexs)
-    setVisibleHexsByPlayer(visibleHexsByPlayerCopy)
-  }
 
   /**
    * Gets hex's occupant pnj if any
@@ -172,9 +44,11 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
    * @returns {Pnj | undefined}
    */
   function getPnjInHex (hexId: string): Pnj | undefined {
-    for (const pnj of pnjList) {
-      if (pnj.hexLocationId === hexId) {
-        return pnj
+    for (const player of playerList) {
+      for (const pnj of player.pnjList) {
+        if (pnj.hexLocationId === hexId) {
+          return pnj
+        }
       }
     }
   }
@@ -185,25 +59,13 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
    * @returns {any}
    */
   function getCityInHex (hexId: string) {
-    for (const city of cityList) {
-      if (city.hexLocationId === hexId) {
-        return city
+    for (const player of playerList) {
+      for (const city of player.cityList) {
+        if (city.hexLocationId === hexId) {
+          return city
+        }
       }
     }
-  }
-
-  /**
-   * Gets random hexLocationId from board
-   * @returns {string}
-   */
-  function getRandomHexLocationId () {
-    const yCoord = getRandomInt(board.length)
-    const xCoord = getRandomInt(board[yCoord].length)
-    return `${xCoord}_${yCoord}`
-  }
-
-  function getRandomInt (max: number) {
-    return Math.floor(Math.random() * max)
   }
 
   /**
@@ -218,23 +80,9 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
   }
 
   function addNewVisibleHexsAfterMovement (newLocation: string) {
-    const playerVisibleHexs = visibleHexsByPlayer.find(elem => elem.playerId === activePlayer.playerId)
-
-    if (!playerVisibleHexs?.visibleHexsIds) {
-      return
-    }
-
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
-      if (!playerVisibleHexs.visibleHexsIds.includes(hexId)) {
-        playerVisibleHexs.visibleHexsIds.push(hexId)
-      }
-    }
-  }
-
-  function setPlayerPnjsActive () {
-    for (const pnj of pnjList) {
-      if (isPnjAlly(pnj, activePlayer)) {
-        pnj.canMove = true
+      if (!activePlayer.visibleHexsIds.includes(hexId)) {
+        activePlayer.visibleHexsIds.push(hexId)
       }
     }
   }
@@ -244,9 +92,10 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
    * @param {Pnj} pnjToMove
    */
   function selectPnjToMove (pnjToMove: Pnj) {
-    setMovingPnj(Object.assign(pnjToMove, {
+    setMovingPnj({
+      ...pnjToMove,
       destinationHexs: getPnjAdjacentHexs(pnjToMove)
-    }))
+    })
   }
 
   /**
@@ -309,13 +158,7 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
    * @param {Pnj} pnjInDestinationHex
    */
   function killPnj (pnjInDestinationHex: Pnj) {
-    const pnjListCopy = _.cloneDeep(pnjList)
-    const pnjIndex = pnjListCopy.findIndex(pnj => pnj.id === pnjInDestinationHex.id)
-
-    if (pnjIndex >= 0) {
-      pnjListCopy.splice(pnjIndex, 1)
-    }
-    setPnjList(pnjListCopy)
+    // TODO
   }
 
   /**
@@ -328,11 +171,7 @@ const Board:React.FC<BoardProps> = ({ turn }) => {
   }
 
   function isHexVisible (hexId: string): boolean {
-    return getActivePlayerVisibleHexs().includes(hexId)
-  }
-
-  function getActivePlayerVisibleHexs () {
-    return visibleHexsByPlayer.find(elem => elem.playerId === activePlayer.playerId)?.visibleHexsIds || []
+    return activePlayer.visibleHexsIds.includes(hexId)
   }
 
   return (

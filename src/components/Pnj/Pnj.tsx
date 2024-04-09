@@ -6,10 +6,15 @@ import { isPnjAlly } from '../../utils/PnjUtils'
 
 import './Pnj.scss'
 
+export interface PnjOwner {
+  id: number,
+  color: string
+}
+
 export interface Pnj {
   type: string,
   id: string,
-  owner: number,
+  owner: PnjOwner
   canMove: boolean,
   hexLocationId: string
 }
@@ -29,7 +34,7 @@ const PnjComp:React.FC<PnjCompProps> = ({ pnj }) => {
   }, [pnj, pnj.canMove, activePlayer])
 
   return (
-    <span className={`${inactivePnj ? 'inactive' : ''}`}>{pnj.id}</span>
+    <span className={`${inactivePnj ? 'inactive' : ''}`} style={{ color: pnj.owner.color }}>{pnj.id}</span>
   )
 }
 

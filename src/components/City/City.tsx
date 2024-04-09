@@ -3,7 +3,7 @@ import React from 'react'
 export interface City {
   name: string,
   id: string,
-  owner: number,
+  ownerId: number,
   hexLocationId: string
 }
 
@@ -13,7 +13,7 @@ interface CityCompProps {
 
 const CityComp:React.FC<CityCompProps> = ({ city }) => {
   return (
-    <span>{city.id}</span>
+    <span>{city.name}</span>
   )
 }
 
