@@ -16,7 +16,10 @@ export interface Pnj {
   id: string,
   owner: PnjOwner
   canMove: boolean,
-  hexLocationId: string
+  hexLocationId: string,
+  attack: number,
+  defense: number,
+  healthPoints: number
 }
 
 interface PnjCompProps {
@@ -34,7 +37,9 @@ const PnjComp:React.FC<PnjCompProps> = ({ pnj }) => {
   }, [pnj, pnj.canMove, activePlayer])
 
   return (
-    <span className={`${inactivePnj ? 'inactive' : ''}`} style={{ color: pnj.owner.color }}>{pnj.id}</span>
+    <span className={`${inactivePnj ? 'inactive' : ''}`} style={{ color: pnj.owner.color }}>
+      {`Id: ${pnj.id} - Hp: ${pnj.healthPoints}`}
+    </span>
   )
 }
 

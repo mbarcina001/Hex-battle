@@ -77,6 +77,9 @@ const App: React.FC = () => {
     setBoard(board)
   }
 
+  /**
+   * Auxiliar function that initializes player list
+   */
   function intializePlayerList () {
     const players: Player[] = [
       getInitialPlayer(1, 'red'),
@@ -88,7 +91,7 @@ const App: React.FC = () => {
   }
 
   /**
-   * Gets initial player
+   * Gets a player with given params, a city and a pnj
    * @param { number } playerId,
    * @param { string } playerColor
    * @returns {Player}
@@ -109,7 +112,10 @@ const App: React.FC = () => {
         color: playerColor
       },
       hexLocationId: firstCity.hexLocationId,
-      canMove: false
+      canMove: false,
+      attack: 6,
+      defense: 2,
+      healthPoints: 10
     }
 
     const visibleHexsIds: string[] = [firstPnj.hexLocationId].concat(getAdjacentHexIds(firstPnj.hexLocationId, board))
@@ -123,6 +129,11 @@ const App: React.FC = () => {
     }
   }
 
+  /**
+   * Changes current turn to the next player
+   *  If current player is last player => increase turn number
+   * @returns { void }
+   */
   function changeTurn () {
     const activePlayerIndex = playerList.findIndex(player => player.playerId === activePlayerId)
 
@@ -136,13 +147,35 @@ const App: React.FC = () => {
     setActivePlayerId(newActivePlayerId)
   }
 
+  /**
+   * Updates every received player
+   * @param {Player[]} playerToUpdateArr
+   */
+  function updatePlayers (playerToUpdateArr: Player[]) {
+    const playerListCopy = _.cloneDeep(playerList)
+
+    for (const playerToUpdate of playerToUpdateArr) {
+      const playerToUpdateIdx = playerListCopy.findIndex(player => player.playerId === playerToUpdate.playerId)
+
+      if (playerToUpdateIdx >= 0) {
+        playerListCopy[playerToUpdateIdx] = playerToUpdate
+      }
+    }
+
+    setPlayerList(playerListCopy)
+  }
+
+  /**
+   * Shows winner if any; else shows board
+   * @returns {any}
+   */
   function getMainContent () {
     if (winner) {
       return <p>{`Ganador: Jugador ${winner}`}</p>
     }
 
     return (
-      <Board board={board} playerList={playerList} />
+      <Board board={board} playerList={playerList} updatePlayers={updatePlayers} />
     )
   }
 

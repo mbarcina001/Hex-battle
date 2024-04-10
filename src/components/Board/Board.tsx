@@ -9,16 +9,18 @@ import { Pnj } from '../Pnj/Pnj'
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
 
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
-import { isPnjEnemy, isPnjAlly } from '../../utils/PnjUtils'
+import { MAX_HEALTH_POINTS, isPnjEnemy, isPnjAlly, calcDamage, calcHealPower, calcCounterDamage } from '../../utils/PnjUtils'
 
 import { Player } from '../../App'
 
 interface BoardProps {
   board: Hex[][];
-  playerList: Player[]
+  playerList: Player[],
+  updatePlayers: Function
 }
 
-export interface PnjToMove extends Pnj {
+export interface PnjToMove {
+  whichPnj: Pnj,
   destinationHexs: string[]
 }
 
@@ -27,7 +29,7 @@ export interface VisibleHexsByPlayer {
   visibleHexsIds: string[]
 }
 
-const Board:React.FC<BoardProps> = ({ board, playerList }) => {
+const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
   const [selectedHex, setSelectedHex] = useState<string>('')
   const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
 
@@ -69,22 +71,86 @@ const Board:React.FC<BoardProps> = ({ board, playerList }) => {
   }
 
   /**
-   * Moves received pnj to received location
-   * @param {PnjToMove} pnjToMove
-   * @param {string} locationToMove
+   * Trigger selected hex actions:
+   *  - Show destination nodes if pnj is in hex
    */
-  function movePnj (pnjToMove: PnjToMove, locationToMove: string) {
-    pnjToMove.hexLocationId = locationToMove
-    addNewVisibleHexsAfterMovement(locationToMove)
-    pnjToMove.canMove = false
+  function triggerSelectedHexActions () {
+    const pnjInDestinationHex = getPnjInHex(selectedHex)
+
+    if (movingPnj?.whichPnj.canMove && movingPnj?.destinationHexs?.includes(selectedHex)) {
+      if (pnjInDestinationHex && isPnjAlly(pnjInDestinationHex, activePlayer)) {
+        healPnj(movingPnj.whichPnj, pnjInDestinationHex)
+      } else if (pnjInDestinationHex && isPnjEnemy(pnjInDestinationHex, activePlayer)) {
+        attackPnj(movingPnj.whichPnj, pnjInDestinationHex)
+      } else {
+        movePnjToDestination(movingPnj.whichPnj)
+      }
+
+      setMovingPnj(undefined)
+      setSelectedHex('')
+    } else if (pnjInDestinationHex?.hexLocationId) {
+      selectPnjToMove(pnjInDestinationHex)
+    }
   }
 
-  function addNewVisibleHexsAfterMovement (newLocation: string) {
-    for (const hexId of getAdjacentHexIds(newLocation, board)) {
-      if (!activePlayer.visibleHexsIds.includes(hexId)) {
-        activePlayer.visibleHexsIds.push(hexId)
-      }
+  /**
+   * Heals received pnj
+   * @param {Pnj} healerPnj
+   * @param {Pnj} restoredPnj
+   */
+  function healPnj (healerPnj: Pnj, restoredPnj: Pnj) {
+    restoredPnj.healthPoints = restoredPnj.healthPoints + calcHealPower(healerPnj)
+
+    if (restoredPnj.healthPoints > MAX_HEALTH_POINTS) {
+      restoredPnj.healthPoints = MAX_HEALTH_POINTS
     }
+
+    healerPnj.canMove = false
+    updatePlayers([activePlayer])
+  }
+
+  /**
+   * Attacks received pnj
+   * @param {Pnj} attackingPnj
+   * @param {Pnj} attackedPnj
+   */
+  function attackPnj (attackingPnj: Pnj, attackedPnj: Pnj) {
+    const defenderOwner = playerList.find(player => player.playerId === attackedPnj.owner.id)
+
+    if (!defenderOwner) {
+      return
+    }
+
+    attackedPnj.healthPoints = attackedPnj.healthPoints - calcDamage(attackingPnj, attackedPnj)
+
+    if (attackedPnj.healthPoints <= 0) {
+      defenderOwner.pnjList = defenderOwner.pnjList.filter(pnj => pnj.id !== attackedPnj.id)
+      movePnj(attackingPnj, selectedHex, false)
+      attackingPnj.canMove = false
+      updatePlayers([activePlayer, defenderOwner])
+      return
+    }
+
+    attackingPnj.healthPoints = attackingPnj.healthPoints - calcCounterDamage(attackedPnj, attackingPnj)
+
+    if (attackedPnj.healthPoints <= 0) {
+      defenderOwner.pnjList = defenderOwner.pnjList.filter(pnj => pnj.id !== attackedPnj.id)
+      movePnj(attackingPnj, selectedHex, false)
+    }
+
+    attackingPnj.canMove = false
+    console.log(JSON.stringify([activePlayer, defenderOwner]))
+    updatePlayers([activePlayer, defenderOwner])
+  }
+
+  /**
+   * Moves given pnj to selected hex
+   * @param {Pnj} movingPnj
+   */
+  function movePnjToDestination (movingPnj: Pnj) {
+    movePnj(movingPnj, selectedHex)
+    setSelectedHex('')
+    setMovingPnj(undefined)
   }
 
   /**
@@ -93,72 +159,38 @@ const Board:React.FC<BoardProps> = ({ board, playerList }) => {
    */
   function selectPnjToMove (pnjToMove: Pnj) {
     setMovingPnj({
-      ...pnjToMove,
+      whichPnj: pnjToMove,
       destinationHexs: getPnjAdjacentHexs(pnjToMove)
     })
   }
 
   /**
-   * Trigger selected hex actions:
-   *  - Show destination nodes if pnj is in hex
+   * Moves received pnj to received location
+   * @param {Pnj} pnjToMove
+   * @param {string} locationToMove
+   * @param {boolean} callUpdate
    */
-  function triggerSelectedHexActions () {
-    console.log('triggerSelectedHexActions')
-    const pnjInDestinationHex = getPnjInHex(selectedHex)
+  function movePnj (pnjToMove: Pnj, locationToMove: string, callUpdate = true) {
+    const pnj = activePlayer.pnjList.find(playerPnj => playerPnj.id === pnjToMove.id)
 
-    if (movingPnj?.canMove && movingPnj?.destinationHexs?.includes(selectedHex)) {
-      if (pnjInDestinationHex && isPnjAlly(pnjInDestinationHex, activePlayer)) {
-        healPnj(pnjInDestinationHex)
-        return
+    if (pnj) {
+      pnj.canMove = false
+      pnj.hexLocationId = locationToMove
+      addNewVisibleHexsAfterMovement(locationToMove)
+
+      if (callUpdate) {
+        updatePlayers([activePlayer])
       }
+    }
+  }
 
-      // ATACK
-      if (pnjInDestinationHex && isPnjEnemy(pnjInDestinationHex, activePlayer)) {
-        attackPnj(movingPnj, pnjInDestinationHex)
-        return
+  function addNewVisibleHexsAfterMovement (newLocation: string) {
+    for (const hexId of getAdjacentHexIds(newLocation, board)) {
+      if (!activePlayer.visibleHexsIds.includes(hexId)) {
+        activePlayer.visibleHexsIds.push(hexId)
+        updatePlayers([activePlayer])
       }
-
-      // MOVE PNJ TO DESTINATION
-      movePnj(movingPnj, selectedHex)
-      setSelectedHex('')
-      setMovingPnj(undefined)
-      return
     }
-
-    // SELECT PNJ TO MOVE
-    if (pnjInDestinationHex?.hexLocationId) {
-      selectPnjToMove(pnjInDestinationHex)
-      return
-    }
-
-    setMovingPnj(undefined)
-  }
-
-  /**
-   * Heals received pnj
-   * @param {Pnj} pnjInDestinationHex
-   */
-  function healPnj (pnjInDestinationHex: Pnj) {
-    // TODO
-  }
-
-  /**
-   * Attacks received pnj
-   * @param {Pnj} attackingPnj
-   * @param {Pnj} attackedPnj
-   */
-  function attackPnj (attackingPnj: PnjToMove, attackedPnj: Pnj) {
-    // TODO: Reduce heal & kill if heal === 0
-    killPnj(attackedPnj)
-    movePnj(attackingPnj, selectedHex)
-  }
-
-  /**
-   * Kills received pnj
-   * @param {Pnj} pnjInDestinationHex
-   */
-  function killPnj (pnjInDestinationHex: Pnj) {
-    // TODO
   }
 
   /**
