@@ -12,6 +12,9 @@ import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
 import { MAX_HEALTH_POINTS, isPnjEnemy, isPnjAlly, calcDamage, calcHealPower, calcCounterDamage } from '../../utils/PnjUtils'
 
 import { Player } from '../../App'
+import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu'
+
+import * as _ from 'lodash'
 
 interface BoardProps {
   board: Hex[][];
@@ -32,8 +35,22 @@ export interface VisibleHexsByPlayer {
 const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
   const [selectedHex, setSelectedHex] = useState<string>('')
   const [movingPnj, setMovingPnj] = useState<PnjToMove | undefined>(undefined)
+  const [actionList, setActionList] = useState<ACTION_ENUM[]>([])
 
   const activePlayer = useActivePlayerContext()
+
+  useEffect(() => {
+    setActionList([])
+  }, [activePlayer])
+
+  useEffect(() => {
+    if (movingPnj) {
+      pushAction(ACTION_ENUM.HEAL_ACTIVE_PNJ)
+    } else {
+      setActionList([])
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movingPnj])
 
   useEffect(() => {
     triggerSelectedHexActions()
@@ -88,8 +105,10 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
 
       setMovingPnj(undefined)
       setSelectedHex('')
-    } else if (pnjInDestinationHex?.hexLocationId) {
+    } else if (pnjInDestinationHex && isPnjAlly(pnjInDestinationHex, activePlayer) && pnjInDestinationHex.canMove) {
       selectPnjToMove(pnjInDestinationHex)
+    } else {
+      setActionList([])
     }
   }
 
@@ -151,6 +170,7 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
     movePnj(movingPnj, selectedHex)
     setSelectedHex('')
     setMovingPnj(undefined)
+    setActionList([])
   }
 
   /**
@@ -206,6 +226,16 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
     return activePlayer.visibleHexsIds.includes(hexId)
   }
 
+  function pushAction (action: ACTION_ENUM) {
+    const actionListCopy = _.cloneDeep(actionList)
+
+    if (!actionListCopy.includes(action)) {
+      actionListCopy.push(action)
+    }
+
+    setActionList(actionListCopy)
+  }
+
   return (
     <Container>
       {board?.map((boardRow, idx) => (
@@ -225,6 +255,7 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
           ))}
         </Row>
       ))}
+      <ActionMenu actionList={actionList} />
     </Container>
   )
 }
