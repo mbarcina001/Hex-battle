@@ -1,7 +1,7 @@
-import { Player } from '../App'
-import { Pnj } from '../components/Pnj/Pnj'
+import { Player } from '../App';
+import { Pnj } from '../components/Pnj/Pnj';
 
-export const MAX_HEALTH_POINTS = 10
+export const MAX_HEALTH_POINTS = 10;
 
 /**
  * Calculates if received pnj is enemy of received active player
@@ -9,8 +9,8 @@ export const MAX_HEALTH_POINTS = 10
  * @param {Player} activePlayer
  * @returns {boolean}
  */
-export function isEnemyPnj (pnj: Pnj, activePlayer: Player): boolean {
-  return pnj.owner.id !== activePlayer.playerId
+export function isEnemyPnj(pnj: Pnj, activePlayer: Player): boolean {
+  return pnj.owner.id !== activePlayer.playerId;
 }
 
 /**
@@ -19,8 +19,8 @@ export function isEnemyPnj (pnj: Pnj, activePlayer: Player): boolean {
  * @param {Player} activePlayer
  * @returns {boolean}
  */
-export function isAllyPnj (pnj: Pnj, activePlayer: Player): boolean {
-  return pnj.owner.id === activePlayer.playerId
+export function isAllyPnj(pnj: Pnj, activePlayer: Player): boolean {
+  return pnj.owner.id === activePlayer.playerId;
 }
 
 /**
@@ -29,10 +29,10 @@ export function isAllyPnj (pnj: Pnj, activePlayer: Player): boolean {
  * @param {Pnj} defender
  * @returns {number}
  */
-export function calcDamage (attacker: Pnj, defender: Pnj): number {
-  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS)
-  const deffenderForce = defender.defense * (defender.healthPoints / MAX_HEALTH_POINTS)
-  return Math.floor(attackerForce - deffenderForce)
+export function calcDamage(attacker: Pnj, defender: Pnj): number {
+  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+  const deffenderForce = defender.defense * (defender.healthPoints / MAX_HEALTH_POINTS);
+  return Math.floor(attackerForce - deffenderForce);
 }
 
 /**
@@ -41,9 +41,9 @@ export function calcDamage (attacker: Pnj, defender: Pnj): number {
  * @param {Pnj} defender
  * @returns {number}
  */
-export function calcCounterDamage (attacker: Pnj, defender: Pnj): number {
-  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS)
-  return Math.ceil(attackerForce - defender.defense)
+export function calcCounterDamage(attacker: Pnj, defender: Pnj): number {
+  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+  return Math.ceil(attackerForce - defender.defense);
 }
 
 /**
@@ -51,8 +51,8 @@ export function calcCounterDamage (attacker: Pnj, defender: Pnj): number {
  * @param {Pnj} healer
  * @returns {number}
  */
-export function calcHealPower (healer: Pnj): number {
-  return healer.attack * (healer.healthPoints / MAX_HEALTH_POINTS)
+export function calcHealPower(healer: Pnj): number {
+  return healer.attack * (healer.healthPoints / MAX_HEALTH_POINTS);
 }
 
 /**
@@ -61,12 +61,17 @@ export function calcHealPower (healer: Pnj): number {
  * @param {Player[]} playerList
  * @returns {Pnj | undefined}
  */
-export function getPnjInHex (hexId: string, playerList: Player[]): Pnj | undefined {
+export function getPnjInHex(
+  hexId: string,
+  playerList: Player[]
+): Pnj | undefined {
   for (const player of playerList) {
     for (const pnj of player.pnjList) {
       if (pnj.hexLocationId === hexId) {
-        return pnj
+        return pnj;
       }
     }
   }
+
+  return undefined;
 }

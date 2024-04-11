@@ -1,46 +1,49 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, ReactElement } from 'react';
 
-import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
+import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
-import { isAllyPnj } from '../../utils/PnjUtils'
+import { isAllyPnj } from '../../utils/PnjUtils';
 
-import './Pnj.scss'
+import './Pnj.scss';
 
 export interface PnjOwner {
-  id: number,
-  color: string
+  id: number;
+  color: string;
 }
 
 export interface Pnj {
-  type: string,
-  id: string,
-  owner: PnjOwner
-  canMove: boolean,
-  hexLocationId: string,
-  attack: number,
-  defense: number,
-  healthPoints: number
+  type: string;
+  id: string;
+  owner: PnjOwner;
+  canMove: boolean;
+  hexLocationId: string;
+  attack: number;
+  defense: number;
+  healthPoints: number;
 }
 
 interface PnjCompProps {
-  pnj: Pnj
+  pnj: Pnj;
 }
 
-const PnjComp:React.FC<PnjCompProps> = ({ pnj }) => {
-  const [inactivePnj, setInactivePnj] = useState<boolean>(true)
+function PnjComp({ pnj }: PnjCompProps): ReactElement {
+  const [isPnjInactive, setIsPnjInactive] = useState<boolean>(true);
 
-  const activePlayer = useActivePlayerContext()
+  const activePlayer = useActivePlayerContext();
 
   useEffect(() => {
-    const inactivePnj = !pnj.canMove && isAllyPnj(pnj, activePlayer)
-    setInactivePnj(inactivePnj)
-  }, [pnj, pnj.canMove, activePlayer])
+    const checkIsPnjInactive = !pnj.canMove && isAllyPnj(pnj, activePlayer);
+    setIsPnjInactive(checkIsPnjInactive);
+  }, [pnj, pnj.canMove, activePlayer]);
 
   return (
-    <span className={`${inactivePnj ? 'inactive' : ''}`} style={{ color: pnj.owner.color }}>
+    <span
+      className={`${isPnjInactive ? 'inactive' : ''}`}
+      style={{ color: pnj.owner.color }}
+    >
       {`Id: ${pnj.id} - Hp: ${pnj.healthPoints}`}
     </span>
-  )
+  );
 }
 
-export default PnjComp
+export default PnjComp;

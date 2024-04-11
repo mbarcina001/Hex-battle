@@ -1,92 +1,65 @@
-import React, { useEffect, useState } from 'react'
-import Container from 'react-bootstrap/Container'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import React, { ReactElement, useEffect, useState } from 'react';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
-import HexComp, { Hex } from '../Hex/Hex'
-import { Pnj } from '../Pnj/Pnj'
+import HexComp, { Hex } from '../Hex/Hex';
+import { Pnj } from '../Pnj/Pnj';
 
-import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
+import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
-import { getAdjacentHexIds } from '../../utils/AdjacencyUtils'
-import { MAX_HEALTH_POINTS, isEnemyPnj, isAllyPnj, calcDamage, calcHealPower, calcCounterDamage, getPnjInHex } from '../../utils/PnjUtils'
+import { getAdjacentHexIds } from '../../utils/AdjacencyUtils';
+import {
+  MAX_HEALTH_POINTS,
+  isEnemyPnj,
+  isAllyPnj,
+  calcDamage,
+  calcHealPower,
+  calcCounterDamage,
+  getPnjInHex,
+} from '../../utils/PnjUtils';
 
-import { Player } from '../../App'
-import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu'
+import { Player } from '../../App';
+import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
-import { getCityInHex, isEnemyCity } from '../../utils/CityUtils'
+import { getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 
 interface BoardProps {
   board: Hex[][];
-  playerList: Player[],
-  updatePlayers: Function
+  playerList: Player[];
+  updatePlayers: (playerList: Player[]) => void;
 }
 
 export interface SelectedPnj {
-  whichPnj: Pnj,
-  destinationHexs: string[]
+  whichPnj: Pnj;
+  destinationHexs: string[];
 }
 
 export interface VisibleHexsByPlayer {
-  playerId: number,
-  visibleHexsIds: string[]
+  playerId: number;
+  visibleHexsIds: string[];
 }
 
-const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
-  const [selectedHex, setSelectedHex] = useState<string>('')
-  const [selectedPnj, setSelectedPnj] = useState<SelectedPnj | undefined>(undefined)
-  const [actionList, setActionList] = useState<ACTION_ENUM[]>([])
+function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
+  const [selectedHex, setSelectedHex] = useState<string>('');
+  const [selectedPnj, setSelectedPnj] = useState<SelectedPnj | undefined>(
+    undefined,
+  );
+  const [actionList, setActionList] = useState<ACTION_ENUM[]>([]);
 
-  const activePlayer = useActivePlayerContext()
-
-  useEffect(() => {
-    setActionList([])
-    setSelectedHex('')
-  }, [activePlayer])
-
-  useEffect(() => {
-    const actions = []
-    if (selectedPnj) {
-      actions.push(ACTION_ENUM.HEAL_ACTIVE_PNJ)
-
-      const cityInHex = getCityInHex(selectedPnj.whichPnj.hexLocationId, playerList)
-      if (cityInHex && isEnemyCity(cityInHex, activePlayer)) {
-        actions.push(ACTION_ENUM.CAPTURE_CITY)
-      }
-    }
-
-    setActionList(actions)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPnj])
-
-  useEffect(() => {
-    triggerSelectedHexActions()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedHex])
+  const activePlayer = useActivePlayerContext();
 
   /**
-   * Trigger selected hex actions:
-   *  - Show destination nodes if pnj is in hex
+   * Given a pnj returns an array with ids of its adjacent hexs
+   * @param {Pnj} pnjInHex
+   * @returns {string[]}
    */
-  function triggerSelectedHexActions () {
-    const pnjInDestinationHex = getPnjInHex(selectedHex, playerList)
+  function getPnjAdjacentHexs(pnjInHex: Pnj): string[] {
+    return getAdjacentHexIds(pnjInHex.hexLocationId, board);
+  }
 
-    if (selectedPnj?.whichPnj.canMove && selectedPnj?.destinationHexs?.includes(selectedHex)) {
-      if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer)) {
-        healPnj(selectedPnj.whichPnj, pnjInDestinationHex)
-      } else if (pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer)) {
-        attackPnj(selectedPnj.whichPnj, pnjInDestinationHex)
-      } else {
-        movePnjToDestination(selectedPnj.whichPnj)
-      }
-
-      setSelectedPnj(undefined)
-      setSelectedHex('')
-    } else if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer) && pnjInDestinationHex.canMove) {
-      selectPnj(pnjInDestinationHex)
-    } else {
-      setSelectedPnj(undefined)
-    }
+  function isHexVisible(hexId: string): boolean {
+    return activePlayer.visibleHexsIds.includes(hexId);
   }
 
   /**
@@ -94,15 +67,15 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
    * @param {Pnj} healerPnj
    * @param {Pnj} restoredPnj
    */
-  function healPnj (healerPnj: Pnj, restoredPnj: Pnj) {
-    restoredPnj.healthPoints = restoredPnj.healthPoints + calcHealPower(healerPnj)
+  function healPnj(healerPnj: Pnj, restoredPnj: Pnj): void {
+    restoredPnj.healthPoints += calcHealPower(healerPnj);
 
     if (restoredPnj.healthPoints > MAX_HEALTH_POINTS) {
-      restoredPnj.healthPoints = MAX_HEALTH_POINTS
+      restoredPnj.healthPoints = MAX_HEALTH_POINTS;
     }
 
-    healerPnj.canMove = false
-    updatePlayers([activePlayer])
+    healerPnj.canMove = false;
+    updatePlayers([activePlayer]);
   }
 
   /**
@@ -110,55 +83,61 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
    * @param {Pnj} attackingPnj
    * @param {Pnj} attackedPnj
    */
-  function attackPnj (attackingPnj: Pnj, attackedPnj: Pnj) {
-    const defenderOwner = playerList.find(player => player.playerId === attackedPnj.owner.id)
+  function attackPnj(attackingPnj: Pnj, attackedPnj: Pnj): void {
+    const defenderOwner = playerList.find(
+      (player) => player.playerId === attackedPnj.owner.id,
+    );
 
     if (!defenderOwner) {
-      return
+      return;
     }
 
-    attackedPnj.healthPoints = attackedPnj.healthPoints - calcDamage(attackingPnj, attackedPnj)
+    attackedPnj.healthPoints -= calcDamage(attackingPnj, attackedPnj);
 
     if (attackedPnj.healthPoints <= 0) {
-      defenderOwner.pnjList = defenderOwner.pnjList.filter(pnj => pnj.id !== attackedPnj.id)
-      movePnj(attackingPnj, selectedHex, false)
-      attackingPnj.canMove = false
-      updatePlayers([activePlayer, defenderOwner])
-      return
+      defenderOwner.pnjList = defenderOwner.pnjList.filter(
+        (pnj) => pnj.id !== attackedPnj.id,
+      );
+      movePnj(attackingPnj, selectedHex, false);
+      attackingPnj.canMove = false;
+      updatePlayers([activePlayer, defenderOwner]);
+      return;
     }
 
-    attackingPnj.healthPoints = attackingPnj.healthPoints - calcCounterDamage(attackedPnj, attackingPnj)
+    attackingPnj.healthPoints -= calcCounterDamage(attackedPnj, attackingPnj);
 
     if (attackedPnj.healthPoints <= 0) {
-      defenderOwner.pnjList = defenderOwner.pnjList.filter(pnj => pnj.id !== attackedPnj.id)
-      movePnj(attackingPnj, selectedHex, false)
+      defenderOwner.pnjList = defenderOwner.pnjList.filter(
+        (pnj) => pnj.id !== attackedPnj.id,
+      );
+      movePnj(attackingPnj, selectedHex, false);
     }
 
-    attackingPnj.canMove = false
-    console.log(JSON.stringify([activePlayer, defenderOwner]))
-    updatePlayers([activePlayer, defenderOwner])
+    attackingPnj.canMove = false;
+    console.log(JSON.stringify([activePlayer, defenderOwner]));
+    updatePlayers([activePlayer, defenderOwner]);
   }
 
   /**
    * Moves given pnj to selected hex
    * @param {Pnj} selectedPnj
    */
-  function movePnjToDestination (selectedPnj: Pnj) {
-    movePnj(selectedPnj, selectedHex)
-    setSelectedHex('')
-    setSelectedPnj(undefined)
-    setActionList([])
+  function movePnjToDestination(selectedPnj: Pnj): void {
+    movePnj(selectedPnj, selectedHex);
+    setSelectedHex('');
+    setSelectedPnj(undefined);
+    setActionList([]);
   }
 
   /**
    * Sets pnj to move next
    * @param {Pnj} SelectedPnj
    */
-  function selectPnj (SelectedPnj: Pnj) {
+  function selectPnj(SelectedPnj: Pnj): void {
     setSelectedPnj({
       whichPnj: SelectedPnj,
-      destinationHexs: getPnjAdjacentHexs(SelectedPnj)
-    })
+      destinationHexs: getPnjAdjacentHexs(SelectedPnj),
+    });
   }
 
   /**
@@ -167,103 +146,162 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
    * @param {string} locationToMove
    * @param {boolean} callUpdate
    */
-  function movePnj (SelectedPnj: Pnj, locationToMove: string, callUpdate = true) {
-    const pnj = activePlayer.pnjList.find(playerPnj => playerPnj.id === SelectedPnj.id)
+  function movePnj(
+    SelectedPnj: Pnj,
+    locationToMove: string,
+    callUpdate = true,
+  ): void {
+    const pnj = activePlayer.pnjList.find(
+      (playerPnj) => playerPnj.id === SelectedPnj.id,
+    );
 
     if (pnj) {
-      pnj.canMove = false
-      pnj.hexLocationId = locationToMove
-      addNewVisibleHexsAfterMovement(locationToMove)
+      pnj.canMove = false;
+      pnj.hexLocationId = locationToMove;
+      addNewVisibleHexsAfterMovement(locationToMove);
 
       if (callUpdate) {
-        updatePlayers([activePlayer])
+        updatePlayers([activePlayer]);
       }
     }
   }
 
-  function addNewVisibleHexsAfterMovement (newLocation: string) {
+  function addNewVisibleHexsAfterMovement(newLocation: string): void {
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
       if (!activePlayer.visibleHexsIds.includes(hexId)) {
-        activePlayer.visibleHexsIds.push(hexId)
-        updatePlayers([activePlayer])
+        activePlayer.visibleHexsIds.push(hexId);
+        updatePlayers([activePlayer]);
       }
     }
   }
 
   /**
-   * Given a pnj returns an array with ids of its adjacent hexs
-   * @param {Pnj} pnjInHex
-   * @returns {string[]}
+   * Trigger selected hex actions:
+   *  - Show destination nodes if pnj is in hex
    */
-  function getPnjAdjacentHexs (pnjInHex: Pnj): string[] {
-    return getAdjacentHexIds(pnjInHex.hexLocationId, board)
-  }
+  function triggerSelectedHexActions(): void {
+    const pnjInDestinationHex = getPnjInHex(selectedHex, playerList);
 
-  function isHexVisible (hexId: string): boolean {
-    return activePlayer.visibleHexsIds.includes(hexId)
+    if (
+      selectedPnj?.whichPnj.canMove &&
+      selectedPnj?.destinationHexs?.includes(selectedHex)
+    ) {
+      if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer)) {
+        healPnj(selectedPnj.whichPnj, pnjInDestinationHex);
+      } else if (
+        pnjInDestinationHex &&
+        isEnemyPnj(pnjInDestinationHex, activePlayer)
+      ) {
+        attackPnj(selectedPnj.whichPnj, pnjInDestinationHex);
+      } else {
+        movePnjToDestination(selectedPnj.whichPnj);
+      }
+
+      setSelectedPnj(undefined);
+      setSelectedHex('');
+    } else if (
+      pnjInDestinationHex &&
+      isAllyPnj(pnjInDestinationHex, activePlayer) &&
+      pnjInDestinationHex.canMove
+    ) {
+      selectPnj(pnjInDestinationHex);
+    } else {
+      setSelectedPnj(undefined);
+    }
   }
 
   /**
    * Triggers received action
    * @param {ACTION_ENUM} action
    */
-  function triggerAction (action: ACTION_ENUM): void {
-    console.log('triggerAction')
-    console.log(action)
+  function triggerAction(action: ACTION_ENUM): void {
     switch (action) {
       case ACTION_ENUM.HEAL_ACTIVE_PNJ:
         if (selectedPnj) {
-          selectedPnj.whichPnj.healthPoints = selectedPnj.whichPnj.healthPoints + 3
-          selectedPnj.whichPnj.canMove = false
-          updatePlayers([activePlayer])
+          selectedPnj.whichPnj.healthPoints =
+            selectedPnj.whichPnj.healthPoints + 3;
+          selectedPnj.whichPnj.canMove = false;
+          updatePlayers([activePlayer]);
         }
-        break
+        break;
       case ACTION_ENUM.CAPTURE_CITY:
-        console.log('CAPTURE')
-        console.log(`selectedPnj: ${JSON.stringify(selectedPnj)}`)
         if (selectedPnj) {
-          const cityInHex = getCityInHex(selectedPnj.whichPnj.hexLocationId, playerList)
-          console.log(`cityInHex: ${JSON.stringify(cityInHex)}`)
-          const playersToUpdate = []
+          const cityInHex = getCityInHex(
+            selectedPnj.whichPnj.hexLocationId,
+            playerList,
+          );
+          const playersToUpdate = [];
 
           if (cityInHex) {
-            const owner = playerList.find(player => player.playerId === cityInHex?.ownerId)
-            console.log(`owner: ${JSON.stringify(owner)}`)
+            const owner = playerList.find(
+              (player) => player.playerId === cityInHex?.ownerId,
+            );
 
             if (owner) {
-              owner.cityList = owner.cityList.filter(city => city.id !== cityInHex.id)
-              console.log(`owner.cityList: ${JSON.stringify(owner.cityList)}`)
-              playersToUpdate.push(owner)
+              owner.cityList = owner.cityList.filter(
+                (city) => city.id !== cityInHex.id,
+              );
+              playersToUpdate.push(owner);
             }
 
-            activePlayer.cityList.push(cityInHex)
-            console.log(`activePlayer: ${JSON.stringify(activePlayer)}`)
-            selectedPnj.whichPnj.canMove = false
-            playersToUpdate.push(activePlayer)
+            activePlayer.cityList.push(cityInHex);
+            selectedPnj.whichPnj.canMove = false;
+            playersToUpdate.push(activePlayer);
           }
 
-          updatePlayers(playersToUpdate)
+          updatePlayers(playersToUpdate);
         }
-        break
+        break;
       default:
-        break
+        break;
     }
 
-    setSelectedPnj(undefined)
-    setSelectedHex('')
+    setSelectedPnj(undefined);
+    setSelectedHex('');
   }
+
+  useEffect(() => {
+    setActionList([]);
+    setSelectedHex('');
+  }, [activePlayer]);
+
+  useEffect(() => {
+    const actions = [];
+    if (selectedPnj) {
+      actions.push(ACTION_ENUM.HEAL_ACTIVE_PNJ);
+
+      const cityInHex = getCityInHex(
+        selectedPnj.whichPnj.hexLocationId,
+        playerList,
+      );
+      if (cityInHex && isEnemyCity(cityInHex, activePlayer)) {
+        actions.push(ACTION_ENUM.CAPTURE_CITY);
+      }
+    }
+
+    setActionList(actions);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPnj]);
+
+  useEffect(() => {
+    triggerSelectedHexActions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedHex]);
 
   return (
     <Container>
       {board?.map((boardRow, idx) => (
-        <Row className='justify-content-md-center' key={idx}>
+        <Row className="justify-content-md-center" key={idx}>
           {boardRow.map((_, jdx) => (
-            <Col key={`${jdx}_${idx}`} xs lg='1'>
+            <Col key={`${jdx}_${idx}`} xs lg="1">
               <HexComp
                 hex={board[idx][jdx]}
                 isSelected={selectedHex === `${jdx}_${idx}`}
                 isVisible={isHexVisible(`${jdx}_${idx}`)}
-                isDestinationHex={selectedPnj?.destinationHexs?.includes(`${jdx}_${idx}`) ?? false}
+                isDestinationHex={
+                  selectedPnj?.destinationHexs?.includes(`${jdx}_${idx}`) ??
+                  false
+                }
                 pnjInHex={getPnjInHex(`${jdx}_${idx}`, playerList)}
                 cityInHex={getCityInHex(`${jdx}_${idx}`, playerList)}
                 setAsSelected={setSelectedHex}
@@ -272,9 +310,9 @@ const Board:React.FC<BoardProps> = ({ board, playerList, updatePlayers }) => {
           ))}
         </Row>
       ))}
-      <ActionMenu actionList={actionList} triggerAction={triggerAction} />
+      <ActionMenu actionList={actionList} triggerAction={() => triggerAction} />
     </Container>
-  )
+  );
 }
 
-export default Board
+export default Board;

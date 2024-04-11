@@ -1,20 +1,18 @@
-import React from 'react'
+import React, { ReactElement } from 'react';
 
 export interface City {
-  name: string,
-  id: string,
-  ownerId: number,
-  hexLocationId: string
+  name: string;
+  id: string;
+  ownerId: number;
+  hexLocationId: string;
 }
 
 interface CityCompProps {
-  city: City
+  city: City;
 }
 
-const CityComp:React.FC<CityCompProps> = ({ city }) => {
-  return (
-    <span>{city.name}</span>
-  )
+function CityComp({ city }: CityCompProps): ReactElement {
+  return <span>{city.name}</span>;
 }
 
-export default CityComp
+export default CityComp;
