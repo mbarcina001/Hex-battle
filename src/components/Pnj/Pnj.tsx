@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
 
-import { isPnjAlly } from '../../utils/PnjUtils'
+import { isAllyPnj } from '../../utils/PnjUtils'
 
 import './Pnj.scss'
 
@@ -32,7 +32,7 @@ const PnjComp:React.FC<PnjCompProps> = ({ pnj }) => {
   const activePlayer = useActivePlayerContext()
 
   useEffect(() => {
-    const inactivePnj = !pnj.canMove && isPnjAlly(pnj, activePlayer)
+    const inactivePnj = !pnj.canMove && isAllyPnj(pnj, activePlayer)
     setInactivePnj(inactivePnj)
   }, [pnj, pnj.canMove, activePlayer])
 

@@ -1,5 +1,5 @@
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext'
-import { isPnjAlly } from '../../utils/PnjUtils'
+import { isAllyPnj } from '../../utils/PnjUtils'
 import CityComp, { City } from '../City/City'
 import PnjComp, { Pnj } from '../Pnj/Pnj'
 import './Hex.scss'
@@ -35,7 +35,7 @@ const HexComp:React.FC<HexProps> = ({ hex, isSelected, isVisible, isDestinationH
 
   function getBorderColorClass () {
     if (isDestinationHex && pnjInHex) {
-      if (isPnjAlly(pnjInHex, activePlayer)) {
+      if (isAllyPnj(pnjInHex, activePlayer)) {
         return 'ally'
       }
 

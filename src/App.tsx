@@ -4,14 +4,14 @@ import Board from './components/Board/Board'
 import Button from 'react-bootstrap/Button'
 
 import { ActivePlayerContext } from './context/ActivePlayerContext/ActivePlayerContext'
-import { BOARD_TYPES } from './App.constants'
 import { Hex } from './components/Hex/Hex'
 import { City } from './components/City/City'
 import { Pnj } from './components/Pnj/Pnj'
-import { getRandomHexLocationId } from './utils/HexUtils'
-import { getAdjacentHexIds } from './utils/AdjacencyUtils'
 
 import * as _ from 'lodash'
+import { getInitialBoard } from './utils/BoardUtils'
+import { getActivePlayer, getDummyPlayer, getInitialPlayer } from './utils/PlayerUtils'
+import { checkWinner } from './utils/GameUtils'
 
 export interface Player {
   playerId: number,
@@ -25,11 +25,11 @@ const App: React.FC = () => {
   const [activePlayerId, setActivePlayerId] = useState<number>(-1)
   const [playerList, setPlayerList] = useState<Player[]>([])
   const [actualTurn, setActualTurn] = useState<number>(1)
-  const [winner] = useState<number | undefined>(undefined)
+  const [winner, setWinner] = useState<Player | undefined>(undefined)
   const [board, setBoard] = useState<Hex[][]>([])
 
   useEffect(() => {
-    initializeBoard()
+    setBoard(getInitialBoard)
   }, [])
 
   useEffect(() => {
@@ -57,76 +57,16 @@ const App: React.FC = () => {
   }, [activePlayerId])
 
   /**
-   * Auxiliar function that initializes board
-   */
-  function initializeBoard () {
-    const board: Hex[][] = []
-    BOARD_TYPES.forEach((_, idx) => {
-      const row: Hex[] = []
-
-      BOARD_TYPES[idx].forEach((_, jdx) => {
-        row.push({
-          id: `${jdx}_${idx}`,
-          type: BOARD_TYPES[idx][jdx]
-        })
-      })
-
-      board.push(row)
-    })
-
-    setBoard(board)
-  }
-
-  /**
    * Auxiliar function that initializes player list
    */
   function intializePlayerList () {
     const players: Player[] = [
-      getInitialPlayer(1, 'red'),
-      getInitialPlayer(2, 'blue')
+      getInitialPlayer(1, 'red', board),
+      getInitialPlayer(2, 'blue', board)
     ]
 
     setPlayerList(players)
     setActivePlayerId(players[0].playerId)
-  }
-
-  /**
-   * Gets a player with given params, a city and a pnj
-   * @param { number } playerId,
-   * @param { string } playerColor
-   * @returns {Player}
-   */
-  function getInitialPlayer (playerId: number, playerColor: string): Player {
-    const firstCity: City = {
-      id: `cit_${playerId}`,
-      name: `City ${playerId}`,
-      ownerId: playerId,
-      hexLocationId: getRandomHexLocationId(board)
-    }
-
-    const firstPnj: Pnj = {
-      type: 'any',
-      id: `pnj_${playerId}`,
-      owner: {
-        id: playerId,
-        color: playerColor
-      },
-      hexLocationId: firstCity.hexLocationId,
-      canMove: false,
-      attack: 6,
-      defense: 2,
-      healthPoints: 10
-    }
-
-    const visibleHexsIds: string[] = [firstPnj.hexLocationId].concat(getAdjacentHexIds(firstPnj.hexLocationId, board))
-
-    return {
-      playerId,
-      playerColor,
-      pnjList: [firstPnj],
-      cityList: [firstCity],
-      visibleHexsIds
-    }
   }
 
   /**
@@ -135,16 +75,22 @@ const App: React.FC = () => {
    * @returns { void }
    */
   function changeTurn () {
-    const activePlayerIndex = playerList.findIndex(player => player.playerId === activePlayerId)
-
-    if (activePlayerIndex + 1 === playerList.length) {
-      setActualTurn(actualTurn + 1)
-      setActivePlayerId(playerList[0].playerId)
+    const winPlayer = checkWinner(playerList)
+    if (winPlayer) {
+      setWinner(winPlayer)
       return
     }
 
-    const newActivePlayerId = playerList[activePlayerIndex + 1].playerId
-    setActivePlayerId(newActivePlayerId)
+    const activePlayerIndex = playerList.findIndex(player => player.playerId === activePlayerId)
+    const isLastPlayerInTurn = activePlayerIndex + 1 === playerList.length
+
+    if (isLastPlayerInTurn) {
+      setActualTurn(actualTurn + 1)
+      setActivePlayerId(playerList[0].playerId)
+    } else {
+      const newActivePlayerId = playerList[activePlayerIndex + 1].playerId
+      setActivePlayerId(newActivePlayerId)
+    }
   }
 
   /**
@@ -170,44 +116,16 @@ const App: React.FC = () => {
    * @returns {any}
    */
   function getMainContent () {
-    if (winner) {
-      return <p>{`Ganador: Jugador ${winner}`}</p>
-    }
-
-    return (
-      <Board board={board} playerList={playerList} updatePlayers={updatePlayers} />
-    )
-  }
-
-  /**
-   * Gets current active player
-   * @returns {Player | undefined}
-   */
-  function getActivePlayer (): Player | undefined {
-    if (!playerList.length || activePlayerId < 0) {
-      return
-    }
-
-    return playerList.find(player => player.playerId === activePlayerId)
-  }
-
-  /**
-   * Returns a dummy player
-   * @returns {Player}
-   */
-  function getDummyPlayer (): Player {
-    return {
-      playerId: -1,
-      playerColor: 'no-color',
-      pnjList: [],
-      cityList: [],
-      visibleHexsIds: []
-    }
+    return winner
+      ? <p>{`Ganador: Jugador ${winner.playerId}`}</p>
+      : <Board board={board} playerList={playerList} updatePlayers={updatePlayers} />
   }
 
   return (
     <>
-      <ActivePlayerContext.Provider value={getActivePlayer() ?? getDummyPlayer()}>
+      <ActivePlayerContext.Provider
+        value={getActivePlayer(playerList, activePlayerId) ?? getDummyPlayer()}
+      >
         <p>{`Turno: ${actualTurn} - Jugador: ${activePlayerId}`}</p>
 
         {getMainContent()}
