@@ -30,8 +30,10 @@ export function isAllyPnj(pnj: Pnj, activePlayer: Player): boolean {
  * @returns {number}
  */
 export function calcDamage(attacker: Pnj, defender: Pnj): number {
-  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
-  const deffenderForce = defender.defense * (defender.healthPoints / MAX_HEALTH_POINTS);
+  const attackerForce =
+    attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+  const deffenderForce =
+    defender.defense * (defender.healthPoints / MAX_HEALTH_POINTS);
   return Math.floor(attackerForce - deffenderForce);
 }
 
@@ -42,7 +44,8 @@ export function calcDamage(attacker: Pnj, defender: Pnj): number {
  * @returns {number}
  */
 export function calcCounterDamage(attacker: Pnj, defender: Pnj): number {
-  const attackerForce = attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+  const attackerForce =
+    attacker.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
   return Math.ceil(attackerForce - defender.defense);
 }
 
@@ -56,6 +59,21 @@ export function calcHealPower(healer: Pnj): number {
 }
 
 /**
+ * Gets hex's occupant pnj from received pnjListif any
+ * @param {string} hexId
+ * @param {Player[]} playerList
+ * @returns {Pnj | undefined}
+ */
+function getPnjFromListInHex(hexId: string, pnjList: Pnj[]): Pnj | undefined {
+  return pnjList.find((pnj) => {
+    if (pnj.hexLocationId === hexId) {
+      return pnj;
+    }
+    return undefined;
+  });
+}
+
+/**
  * Gets hex's occupant pnj if any
  * @param {string} hexId
  * @param {Player[]} playerList
@@ -63,13 +81,13 @@ export function calcHealPower(healer: Pnj): number {
  */
 export function getPnjInHex(
   hexId: string,
-  playerList: Player[]
+  playerList: Player[],
 ): Pnj | undefined {
+  // eslint-disable-next-line no-restricted-syntax
   for (const player of playerList) {
-    for (const pnj of player.pnjList) {
-      if (pnj.hexLocationId === hexId) {
-        return pnj;
-      }
+    const foundPnj = getPnjFromListInHex(hexId, player.pnjList);
+    if (foundPnj) {
+      return foundPnj;
     }
   }
 

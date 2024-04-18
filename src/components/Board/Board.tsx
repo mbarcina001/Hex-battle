@@ -27,6 +27,7 @@ import { getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 interface BoardProps {
   board: Hex[][];
   playerList: Player[];
+  // eslint-disable-next-line no-unused-vars
   updatePlayers: (playerList: Player[]) => void;
 }
 
@@ -120,10 +121,10 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
   /**
    * Moves given pnj to selected hex
-   * @param {Pnj} selectedPnj
+   * @param {Pnj} pnjToMove
    */
-  function movePnjToDestination(selectedPnj: Pnj): void {
-    movePnj(selectedPnj, selectedHex);
+  function movePnjToDestination(pnjToMove: Pnj): void {
+    movePnj(pnjToMove, selectedHex);
     setSelectedHex('');
     setSelectedPnj(undefined);
     setActionList([]);
@@ -167,6 +168,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
   }
 
   function addNewVisibleHexsAfterMovement(newLocation: string): void {
+    // eslint-disable-next-line no-restricted-syntax
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
       if (!activePlayer.visibleHexsIds.includes(hexId)) {
         activePlayer.visibleHexsIds.push(hexId);
@@ -218,8 +220,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
     switch (action) {
       case ACTION_ENUM.HEAL_ACTIVE_PNJ:
         if (selectedPnj) {
-          selectedPnj.whichPnj.healthPoints =
-            selectedPnj.whichPnj.healthPoints + 3;
+          selectedPnj.whichPnj.healthPoints += 3;
           selectedPnj.whichPnj.canMove = false;
           updatePlayers([activePlayer]);
         }
@@ -290,20 +291,20 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
   return (
     <Container>
-      {board?.map((boardRow, idx) => (
-        <Row className="justify-content-md-center" key={idx}>
-          {boardRow.map((_, jdx) => (
-            <Col key={`${jdx}_${idx}`} xs lg="1">
+      {board?.map(boardRow => (
+        <Row className="justify-content-md-center" key={boardRow[0].id}>
+          {boardRow.map(boardHex => (
+            <Col key={boardHex.id} xs lg="1">
               <HexComp
-                hex={board[idx][jdx]}
-                isSelected={selectedHex === `${jdx}_${idx}`}
-                isVisible={isHexVisible(`${jdx}_${idx}`)}
+                hex={boardHex}
+                isSelected={selectedHex === boardHex.id}
+                isVisible={isHexVisible(boardHex.id)}
                 isDestinationHex={
-                  selectedPnj?.destinationHexs?.includes(`${jdx}_${idx}`) ??
+                  selectedPnj?.destinationHexs?.includes(boardHex.id) ??
                   false
                 }
-                pnjInHex={getPnjInHex(`${jdx}_${idx}`, playerList)}
-                cityInHex={getCityInHex(`${jdx}_${idx}`, playerList)}
+                pnjInHex={getPnjInHex(boardHex.id, playerList)}
+                cityInHex={getCityInHex(boardHex.id, playerList)}
                 setAsSelected={setSelectedHex}
               />
             </Col>

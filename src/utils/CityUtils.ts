@@ -22,6 +22,24 @@ export function isAllyCity(city: City, activePlayer: Player): boolean {
 }
 
 /**
+ * Gets hex's occupant city from received pnjListif any
+ * @param {string} hexId
+ * @param {Player[]} playerList
+ * @returns {City | undefined}
+ */
+function getCityFromListInHex(
+  hexId: string,
+  pnjList: City[],
+): City | undefined {
+  return pnjList.find((pnj) => {
+    if (pnj.hexLocationId === hexId) {
+      return pnj;
+    }
+    return undefined;
+  });
+}
+
+/**
  * Gets hex's occupant city if any
  * @param {string} hexId
  * @param {Player[]} playerList
@@ -31,11 +49,11 @@ export function getCityInHex(
   hexId: string,
   playerList: Player[],
 ): City | undefined {
+  // eslint-disable-next-line no-restricted-syntax
   for (const player of playerList) {
-    for (const city of player.cityList) {
-      if (city.hexLocationId === hexId) {
-        return city;
-      }
+    const foundCity = getCityFromListInHex(hexId, player.cityList);
+    if (foundCity) {
+      return foundCity;
     }
   }
 

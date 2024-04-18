@@ -8,4 +8,4 @@ export const BOARD_TYPES = [
   ['grass', 'grass', 'desert', 'desert', 'desert'],
   ['grass', 'desert', 'desert', 'desert'],
   ['desert', 'desert', 'desert'],
-]
+];

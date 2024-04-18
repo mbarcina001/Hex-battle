@@ -21,8 +21,6 @@
   },
   "plugins": [ "react", "@typescript-eslint", "react-hooks" ],
   "rules": {
-    "no-use-before-define": "off",
-    "@typescript-eslint/no-use-before-define": [ "error" ],
     "react/jsx-filename-extension": [ "warn", { "extensions": [ ".tsx" ] } ],
     "import/extensions": [ "error", "ignorePackages", { "ts": "never", "tsx": "never" } ],
     "no-shadow": "off",
@@ -34,7 +32,16 @@
     "import/prefer-default-export": "off",
     "react/prop-types": "off",
     "prettier/prettier": [ "error", { "endOfLine": "auto" } ],
-    "linebreak-style": ["error", "windows"]
+    "linebreak-style": ["error", "windows"],
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-uses-react": "off",
+    "operator-linebreak": "off",
+    "react/require-default-props": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "no-param-reassign": "off",
+    "no-use-before-define": "off",
+    "react/no-array-index-key": "off" // Disabled as board size will not be altered
   },
   "settings": {
     "import/resolver": {

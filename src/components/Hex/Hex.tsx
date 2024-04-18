@@ -17,7 +17,8 @@ interface HexProps {
   isDestinationHex: boolean;
   pnjInHex?: Pnj;
   cityInHex?: City;
-  setAsSelected: Function;
+  // eslint-disable-next-line no-unused-vars
+  setAsSelected: (hexId: string) => void;
 }
 
 function HexComp({
@@ -59,13 +60,15 @@ function HexComp({
 
   return (
     <div
-      className={`hex ${isVisible ? hex.type : 'ofuscated'} ${getBorderColorClass()} ${isSelected ? 'selected' : ''}`}
+      className={`hex ${isVisible ? hex.type : 'ofuscated'}
+        ${getBorderColorClass()}
+        ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
     >
       {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
       {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
     </div>
   );
-};
+}
 
 export default HexComp;
