@@ -13,7 +13,7 @@ export function getInitialBoard(): Hex[][] {
     BOARD_TYPES[idx].forEach((__, jdx) => {
       row.push({
         id: `${jdx}_${idx}`,
-        type: BOARD_TYPES[idx][jdx],
+        type: BOARD_TYPES[idx][jdx]
       });
     });
 

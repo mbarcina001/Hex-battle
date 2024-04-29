@@ -28,7 +28,7 @@ function HexComp({
   isDestinationHex,
   pnjInHex,
   cityInHex,
-  setAsSelected,
+  setAsSelected
 }: HexProps): ReactElement {
   const activePlayer = useActivePlayerContext();
 

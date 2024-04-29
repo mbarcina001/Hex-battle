@@ -29,7 +29,7 @@ export function isAllyCity(city: City, activePlayer: Player): boolean {
  */
 function getCityFromListInHex(
   hexId: string,
-  pnjList: City[],
+  pnjList: City[]
 ): City | undefined {
   return pnjList.find((pnj) => {
     if (pnj.hexLocationId === hexId) {
@@ -47,7 +47,7 @@ function getCityFromListInHex(
  */
 export function getCityInHex(
   hexId: string,
-  playerList: Player[],
+  playerList: Player[]
 ): City | undefined {
   // eslint-disable-next-line no-restricted-syntax
   for (const player of playerList) {

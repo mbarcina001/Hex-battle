@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { Player } from '../../App';
 
 export const ActivePlayerContext = React.createContext<Player | undefined>(
-  undefined,
+  undefined
 );
 
 export function useActivePlayerContext(): Player {
@@ -10,7 +10,7 @@ export function useActivePlayerContext(): Player {
 
   if (!activePlayer) {
     throw Error(
-      'default activePlayer must be passed to ActivePlayerContext.Provider',
+      'default activePlayer must be passed to ActivePlayerContext.Provider'
     );
   }
 

@@ -81,7 +81,7 @@ function getPnjFromListInHex(hexId: string, pnjList: Pnj[]): Pnj | undefined {
  */
 export function getPnjInHex(
   hexId: string,
-  playerList: Player[],
+  playerList: Player[]
 ): Pnj | undefined {
   // eslint-disable-next-line no-restricted-syntax
   for (const player of playerList) {

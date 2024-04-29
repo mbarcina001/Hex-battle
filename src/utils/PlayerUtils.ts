@@ -13,7 +13,7 @@ import { getRandomHexLocationId } from './HexUtils';
  */
 export function getActivePlayer(
   playerList: Player[],
-  activePlayerId: number,
+  activePlayerId: number
 ): Player | undefined {
   if (!playerList.length || activePlayerId < 0) {
     return undefined;
@@ -31,13 +31,13 @@ export function getActivePlayer(
 export function getInitialPlayer(
   playerId: number,
   playerColor: string,
-  board: Hex[][],
+  board: Hex[][]
 ): Player {
   const firstCity: City = {
     id: `cit_${playerId}`,
     name: `City ${playerId}`,
     ownerId: playerId,
-    hexLocationId: getRandomHexLocationId(board),
+    hexLocationId: getRandomHexLocationId(board)
   };
 
   const firstPnj: Pnj = {
@@ -45,17 +45,17 @@ export function getInitialPlayer(
     id: `pnj_${playerId}`,
     owner: {
       id: playerId,
-      color: playerColor,
+      color: playerColor
     },
     hexLocationId: firstCity.hexLocationId,
     canMove: false,
     attack: 6,
     defense: 2,
-    healthPoints: 10,
+    healthPoints: 10
   };
 
   const visibleHexsIds: string[] = [firstPnj.hexLocationId].concat(
-    getAdjacentHexIds(firstPnj.hexLocationId, board),
+    getAdjacentHexIds(firstPnj.hexLocationId, board)
   );
 
   return {
@@ -63,7 +63,7 @@ export function getInitialPlayer(
     playerColor,
     pnjList: [firstPnj],
     cityList: [firstCity],
-    visibleHexsIds,
+    visibleHexsIds
   };
 }
 
@@ -77,6 +77,6 @@ export function getDummyPlayer(): Player {
     playerColor: 'no-color',
     pnjList: [],
     cityList: [],
-    visibleHexsIds: [],
+    visibleHexsIds: []
   };
 }

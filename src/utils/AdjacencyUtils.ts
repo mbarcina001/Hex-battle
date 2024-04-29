@@ -27,12 +27,12 @@ function getHorizontalAdjacentCoords(coords: Coords): Coords[] {
   return [
     {
       x: coords.x,
-      y: coords.y - 1,
+      y: coords.y - 1
     },
     {
       x: coords.x,
-      y: coords.y + 1,
-    },
+      y: coords.y + 1
+    }
   ];
 }
 
@@ -45,12 +45,12 @@ function getVerticalAdjacentCoords(coords: Coords): Coords[] {
   return [
     {
       x: coords.x - 1,
-      y: coords.y,
+      y: coords.y
     },
     {
       x: coords.x + 1,
-      y: coords.y,
-    },
+      y: coords.y
+    }
   ];
 }
 
@@ -68,35 +68,35 @@ function getDiagonalAdjacentCoords(coords: Coords, board: Hex[][]): Coords[] {
     return [
       {
         x: coords.x - 1,
-        y: coords.y - 1,
+        y: coords.y - 1
       },
       {
         x: coords.x + 1,
-        y: coords.y + 1,
-      },
+        y: coords.y + 1
+      }
     ];
   }
   if (coords.y > middleRow) {
     return [
       {
         x: coords.x + 1,
-        y: coords.y - 1,
+        y: coords.y - 1
       },
       {
         x: coords.x - 1,
-        y: coords.y + 1,
-      },
+        y: coords.y + 1
+      }
     ];
   }
   return [
     {
       x: coords.x - 1,
-      y: coords.y - 1,
+      y: coords.y - 1
     },
     {
       x: coords.x - 1,
-      y: coords.y + 1,
-    },
+      y: coords.y + 1
+    }
   ];
 }
 
@@ -108,7 +108,7 @@ function getDiagonalAdjacentCoords(coords: Coords, board: Hex[][]): Coords[] {
 export function parseCoordsFromHexId(hexId: string): Coords {
   return {
     x: parseInt(hexId.split('_')[0], 10),
-    y: parseInt(hexId.split('_')[1], 10),
+    y: parseInt(hexId.split('_')[1], 10)
   };
 }
 
@@ -131,12 +131,10 @@ export function getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
   const coords = parseCoordsFromHexId(hexId);
   let adjacentCoords: Coords[] = getHorizontalAdjacentCoords(coords).concat(
     getVerticalAdjacentCoords(coords),
-    getDiagonalAdjacentCoords(coords, board),
+    getDiagonalAdjacentCoords(coords, board)
   );
-  // eslint-disable prettier/prettier
   adjacentCoords = adjacentCoords.filter((coordsToFilter) => (
     checkCoordsInBoardBoundaries(coordsToFilter)
   ));
-  // eslint-enable prettier/prettier
   return adjacentCoords.map((coordsToMap) => parseHexIdFromCoords(coordsToMap));
 }

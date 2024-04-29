@@ -7,7 +7,7 @@ export enum ACTION_ENUM {
   // eslint-disable-next-line no-unused-vars
   HEAL_ACTIVE_PNJ = 'HEAL_ACTIVE_PNJ',
   // eslint-disable-next-line no-unused-vars
-  CAPTURE_CITY = 'CAPTURE_CITY',
+  CAPTURE_CITY = 'CAPTURE_CITY'
 }
 
 export interface ActionMenuProps {
@@ -18,7 +18,7 @@ export interface ActionMenuProps {
 
 function ActionMenu({
   actionList,
-  triggerAction,
+  triggerAction
 }: ActionMenuProps): ReactElement {
   /**
    * Returns action buttons
@@ -35,7 +35,7 @@ function ActionMenu({
           onClick={() => triggerAction(ACTION_ENUM.HEAL_ACTIVE_PNJ)}
         >
           Heal
-        </Button>,
+        </Button>
       );
     }
 
@@ -47,7 +47,7 @@ function ActionMenu({
           onClick={() => triggerAction(ACTION_ENUM.CAPTURE_CITY)}
         >
           Capture
-        </Button>,
+        </Button>
       );
     }
 

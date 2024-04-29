@@ -16,7 +16,7 @@ import {
   calcDamage,
   calcHealPower,
   calcCounterDamage,
-  getPnjInHex,
+  getPnjInHex
 } from '../../utils/PnjUtils';
 
 import { Player } from '../../App';
@@ -44,7 +44,7 @@ export interface VisibleHexsByPlayer {
 function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
   const [selectedHex, setSelectedHex] = useState<string>('');
   const [selectedPnj, setSelectedPnj] = useState<SelectedPnj | undefined>(
-    undefined,
+    undefined
   );
   const [actionList, setActionList] = useState<ACTION_ENUM[]>([]);
 
@@ -86,7 +86,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
    */
   function attackPnj(attackingPnj: Pnj, attackedPnj: Pnj): void {
     const defenderOwner = playerList.find(
-      (player) => player.playerId === attackedPnj.owner.id,
+      (player) => player.playerId === attackedPnj.owner.id
     );
 
     if (!defenderOwner) {
@@ -97,7 +97,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
     if (attackedPnj.healthPoints <= 0) {
       defenderOwner.pnjList = defenderOwner.pnjList.filter(
-        (pnj) => pnj.id !== attackedPnj.id,
+        (pnj) => pnj.id !== attackedPnj.id
       );
       movePnj(attackingPnj, selectedHex, false);
       attackingPnj.canMove = false;
@@ -109,7 +109,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
     if (attackedPnj.healthPoints <= 0) {
       defenderOwner.pnjList = defenderOwner.pnjList.filter(
-        (pnj) => pnj.id !== attackedPnj.id,
+        (pnj) => pnj.id !== attackedPnj.id
       );
       movePnj(attackingPnj, selectedHex, false);
     }
@@ -136,7 +136,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
   function selectPnj(SelectedPnj: Pnj): void {
     setSelectedPnj({
       whichPnj: SelectedPnj,
-      destinationHexs: getPnjAdjacentHexs(SelectedPnj),
+      destinationHexs: getPnjAdjacentHexs(SelectedPnj)
     });
   }
 
@@ -149,10 +149,10 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
   function movePnj(
     SelectedPnj: Pnj,
     locationToMove: string,
-    callUpdate = true,
+    callUpdate = true
   ): void {
     const pnj = activePlayer.pnjList.find(
-      (playerPnj) => playerPnj.id === SelectedPnj.id,
+      (playerPnj) => playerPnj.id === SelectedPnj.id
     );
 
     if (pnj) {
@@ -228,18 +228,18 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
         if (selectedPnj) {
           const cityInHex = getCityInHex(
             selectedPnj.whichPnj.hexLocationId,
-            playerList,
+            playerList
           );
           const playersToUpdate = [];
 
           if (cityInHex) {
             const owner = playerList.find(
-              (player) => player.playerId === cityInHex?.ownerId,
+              (player) => player.playerId === cityInHex?.ownerId
             );
 
             if (owner) {
               owner.cityList = owner.cityList.filter(
-                (city) => city.id !== cityInHex.id,
+                (city) => city.id !== cityInHex.id
               );
               playersToUpdate.push(owner);
             }
@@ -272,7 +272,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
       const cityInHex = getCityInHex(
         selectedPnj.whichPnj.hexLocationId,
-        playerList,
+        playerList
       );
       if (cityInHex && isEnemyCity(cityInHex, activePlayer)) {
         actions.push(ACTION_ENUM.CAPTURE_CITY);

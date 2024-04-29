@@ -13,7 +13,7 @@ import { getInitialBoard } from './utils/BoardUtils';
 import {
   getActivePlayer,
   getDummyPlayer,
-  getInitialPlayer,
+  getInitialPlayer
 } from './utils/PlayerUtils';
 import { checkWinner } from './utils/GameUtils';
 
@@ -38,7 +38,7 @@ function App(): ReactElement {
   function intializePlayerList(): void {
     const players: Player[] = [
       getInitialPlayer(1, 'red', board),
-      getInitialPlayer(2, 'blue', board),
+      getInitialPlayer(2, 'blue', board)
     ];
 
     setPlayerList(players);
@@ -58,7 +58,7 @@ function App(): ReactElement {
     }
 
     const activePlayerIndex = playerList.findIndex(
-      (player) => player.playerId === activePlayerId,
+      (player) => player.playerId === activePlayerId
     );
     const isLastPlayerInTurn = activePlayerIndex + 1 === playerList.length;
 
@@ -92,10 +92,10 @@ function App(): ReactElement {
    */
   function updatePlayer(
     playerListToUpdate: Player[],
-    playerToUpdate: Player,
+    playerToUpdate: Player
   ): void {
     const playerToUpdateIdx = playerListToUpdate.findIndex(
-      (player) => player.playerId === playerToUpdate.playerId,
+      (player) => player.playerId === playerToUpdate.playerId
     );
 
     if (playerToUpdateIdx >= 0) {
@@ -132,7 +132,7 @@ function App(): ReactElement {
   useEffect(() => {
     const playerListCopy = _.cloneDeep(playerList);
     const activePlayerIdx = playerListCopy.findIndex(
-      (player) => player.playerId === activePlayerId,
+      (player) => player.playerId === activePlayerId
     );
 
     if (
@@ -142,8 +142,8 @@ function App(): ReactElement {
       const updatedPnjList = playerListCopy[activePlayerIdx].pnjList.map(
         (pnj) => ({
           ...pnj,
-          canMove: true,
-        }),
+          canMove: true
+        })
       );
       playerListCopy[activePlayerIdx].pnjList = updatedPnjList;
       setPlayerList(playerListCopy);
