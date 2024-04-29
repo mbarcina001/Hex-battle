@@ -133,8 +133,10 @@ export function getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
     getVerticalAdjacentCoords(coords),
     getDiagonalAdjacentCoords(coords, board),
   );
-  adjacentCoords = adjacentCoords.filter((coordsToFilter) =>
-    checkCoordsInBoardBoundaries(coordsToFilter),
-  );
+  // eslint-disable prettier/prettier
+  adjacentCoords = adjacentCoords.filter((coordsToFilter) => (
+    checkCoordsInBoardBoundaries(coordsToFilter)
+  ));
+  // eslint-enable prettier/prettier
   return adjacentCoords.map((coordsToMap) => parseHexIdFromCoords(coordsToMap));
 }

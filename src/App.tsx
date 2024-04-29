@@ -78,17 +78,29 @@ function App(): ReactElement {
   function updatePlayers(playerToUpdateArr: Player[]): void {
     const playerListCopy = _.cloneDeep(playerList);
 
-    for (const playerToUpdate of playerToUpdateArr) {
-      const playerToUpdateIdx = playerListCopy.findIndex(
-        (player) => player.playerId === playerToUpdate.playerId,
-      );
-
-      if (playerToUpdateIdx >= 0) {
-        playerListCopy[playerToUpdateIdx] = playerToUpdate;
-      }
-    }
+    playerToUpdateArr.forEach((playerToUpdate: Player) => {
+      updatePlayer(playerListCopy, playerToUpdate);
+    });
 
     setPlayerList(playerListCopy);
+  }
+
+  /**
+   * Updates received player in player list
+   * @param {Player[]} playerListToUpdate
+   * @param {Player} playerToUpdate
+   */
+  function updatePlayer(
+    playerListToUpdate: Player[],
+    playerToUpdate: Player,
+  ): void {
+    const playerToUpdateIdx = playerListToUpdate.findIndex(
+      (player) => player.playerId === playerToUpdate.playerId,
+    );
+
+    if (playerToUpdateIdx >= 0) {
+      playerListToUpdate[playerToUpdateIdx] = playerToUpdate;
+    }
   }
 
   /**
@@ -146,11 +158,11 @@ function App(): ReactElement {
 
       {getMainContent()}
 
-      <Button variant="danger" onClick={changeTurn}>
+      <Button variant="danger" onClick={() => changeTurn}>
         Fin del turno
       </Button>
     </ActivePlayerContext.Provider>
   );
-};
+}
 
 export default App;

@@ -12,7 +12,8 @@ export enum ACTION_ENUM {
 
 export interface ActionMenuProps {
   actionList: ACTION_ENUM[];
-  triggerAction: Function;
+  // eslint-disable-next-line no-unused-vars
+  triggerAction: (action: ACTION_ENUM) => void;
 }
 
 function ActionMenu({

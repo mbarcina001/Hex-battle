@@ -115,7 +115,6 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
     }
 
     attackingPnj.canMove = false;
-    console.log(JSON.stringify([activePlayer, defenderOwner]));
     updatePlayers([activePlayer, defenderOwner]);
   }
 
@@ -291,17 +290,16 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
   return (
     <Container>
-      {board?.map(boardRow => (
+      {board?.map((boardRow) => (
         <Row className="justify-content-md-center" key={boardRow[0].id}>
-          {boardRow.map(boardHex => (
+          {boardRow.map((boardHex) => (
             <Col key={boardHex.id} xs lg="1">
               <HexComp
                 hex={boardHex}
                 isSelected={selectedHex === boardHex.id}
                 isVisible={isHexVisible(boardHex.id)}
                 isDestinationHex={
-                  selectedPnj?.destinationHexs?.includes(boardHex.id) ??
-                  false
+                  selectedPnj?.destinationHexs?.includes(boardHex.id) ?? false
                 }
                 pnjInHex={getPnjInHex(boardHex.id, playerList)}
                 cityInHex={getCityInHex(boardHex.id, playerList)}

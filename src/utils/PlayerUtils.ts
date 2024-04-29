@@ -16,7 +16,7 @@ export function getActivePlayer(
   activePlayerId: number,
 ): Player | undefined {
   if (!playerList.length || activePlayerId < 0) {
-    return;
+    return undefined;
   }
 
   return playerList.find((player) => player.playerId === activePlayerId);
