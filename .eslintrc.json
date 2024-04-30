@@ -43,7 +43,8 @@
     "no-param-reassign": "off",
     "no-use-before-define": "off",
     "react/no-array-index-key": "off", // Disabled as board size will not be altered
-    "comma-dangle": ["error", "only-multiline"]
+    "comma-dangle": ["error", "only-multiline"],
+    "no-underscore-dangle": "off"
   },
   "settings": {
     "import/resolver": {

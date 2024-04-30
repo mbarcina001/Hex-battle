@@ -64,7 +64,10 @@ export function calcHealPower(healer: Pnj): number {
  * @param {Player[]} playerList
  * @returns {Pnj | undefined}
  */
-function getPnjFromListInHex(hexId: string, pnjList: Pnj[]): Pnj | undefined {
+export function _getPnjFromListInHex(
+  hexId: string,
+  pnjList: Pnj[]
+): Pnj | undefined {
   return pnjList.find((pnj) => {
     if (pnj.hexLocationId === hexId) {
       return pnj;
@@ -85,7 +88,7 @@ export function getPnjInHex(
 ): Pnj | undefined {
   // eslint-disable-next-line no-restricted-syntax
   for (const player of playerList) {
-    const foundPnj = getPnjFromListInHex(hexId, player.pnjList);
+    const foundPnj = _getPnjFromListInHex(hexId, player.pnjList);
     if (foundPnj) {
       return foundPnj;
     }

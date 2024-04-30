@@ -26,6 +26,7 @@ export function getActivePlayer(
  * Gets a player with given params, a city and a pnj
  * @param { number } playerId,
  * @param { string } playerColor
+ * @param { Hex[] } board
  * @returns {Player}
  */
 export function getInitialPlayer(

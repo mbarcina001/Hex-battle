@@ -10,7 +10,7 @@ export interface Coords {
  * @param {Coords} coords
  * @returns {boolean}
  */
-function checkCoordsInBoardBoundaries(coords: Coords): boolean {
+export function _checkCoordsInBoardBoundaries(coords: Coords): boolean {
   if (coords.x < 0 || coords.y < 0) {
     return false;
   }
@@ -23,7 +23,7 @@ function checkCoordsInBoardBoundaries(coords: Coords): boolean {
  * @param {Coords} coords
  * @returns {Coords[]}
  */
-function getHorizontalAdjacentCoords(coords: Coords): Coords[] {
+export function _getHorizontalAdjacentCoords(coords: Coords): Coords[] {
   return [
     {
       x: coords.x,
@@ -41,7 +41,7 @@ function getHorizontalAdjacentCoords(coords: Coords): Coords[] {
  * @param {Coords} coords
  * @returns {Coords[]}
  */
-function getVerticalAdjacentCoords(coords: Coords): Coords[] {
+export function _getVerticalAdjacentCoords(coords: Coords): Coords[] {
   return [
     {
       x: coords.x - 1,
@@ -60,7 +60,10 @@ function getVerticalAdjacentCoords(coords: Coords): Coords[] {
  * @param {Hex[][]} board
  * @returns {Coords[]}
  */
-function getDiagonalAdjacentCoords(coords: Coords, board: Hex[][]): Coords[] {
+export function _getDiagonalAdjacentCoords(
+  coords: Coords,
+  board: Hex[][]
+): Coords[] {
   const mapHeight = board.length;
   const middleRow = Math.floor(mapHeight / 2);
 
@@ -129,12 +132,12 @@ export function parseHexIdFromCoords(coords: Coords): string {
  */
 export function getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
   const coords = parseCoordsFromHexId(hexId);
-  let adjacentCoords: Coords[] = getHorizontalAdjacentCoords(coords).concat(
-    getVerticalAdjacentCoords(coords),
-    getDiagonalAdjacentCoords(coords, board)
+  let adjacentCoords: Coords[] = _getHorizontalAdjacentCoords(coords).concat(
+    _getVerticalAdjacentCoords(coords),
+    _getDiagonalAdjacentCoords(coords, board)
   );
   adjacentCoords = adjacentCoords.filter((coordsToFilter) => (
-    checkCoordsInBoardBoundaries(coordsToFilter)
+    _checkCoordsInBoardBoundaries(coordsToFilter)
   ));
   return adjacentCoords.map((coordsToMap) => parseHexIdFromCoords(coordsToMap));
 }
