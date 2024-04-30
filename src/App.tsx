@@ -158,7 +158,7 @@ function App(): ReactElement {
 
       {getMainContent()}
 
-      <Button variant="danger" onClick={() => changeTurn}>
+      <Button variant="danger" onClick={() => changeTurn()}>
         Fin del turno
       </Button>
     </ActivePlayerContext.Provider>

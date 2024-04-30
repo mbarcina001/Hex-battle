@@ -136,8 +136,8 @@ export function getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
     _getVerticalAdjacentCoords(coords),
     _getDiagonalAdjacentCoords(coords, board)
   );
-  adjacentCoords = adjacentCoords.filter((coordsToFilter) => (
+  adjacentCoords = adjacentCoords.filter((coordsToFilter) =>
     _checkCoordsInBoardBoundaries(coordsToFilter)
-  ));
+  );
   return adjacentCoords.map((coordsToMap) => parseHexIdFromCoords(coordsToMap));
 }

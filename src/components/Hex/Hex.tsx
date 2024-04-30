@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 import { isAllyPnj } from '../../utils/PnjUtils';
 import CityComp, { City } from '../City/City';
