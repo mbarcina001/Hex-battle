@@ -5,7 +5,7 @@ import {
   getInitialPlayer,
   getDummyPlayer
 } from '../../src/utils/PlayerUtils';
-import { mockBoard, mockPlayer1 } from '../mocks';
+import { mockBoard, mockPlayer1 } from '../../__mocks__/mocks';
 
 jest.mock('../../src/utils/HexUtils');
 jest.mock('../../src/utils/AdjacencyUtils');

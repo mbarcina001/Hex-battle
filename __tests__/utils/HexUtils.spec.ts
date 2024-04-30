@@ -1,6 +1,6 @@
 import { getRandomHexLocationId } from '../../src/utils/HexUtils';
 import { getRandomInt } from '../../src/utils/Utils';
-import { mockBoard } from '../mocks';
+import { mockBoard } from '../../__mocks__/mocks';
 
 jest.mock('../../src/utils/Utils');
 

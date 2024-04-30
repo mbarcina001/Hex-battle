@@ -3,7 +3,7 @@ import {
   isAllyPnj,
   _getPnjFromListInHex
 } from '../../src/utils/PnjUtils';
-import { mockPnj, mockPlayer1, mockPlayer2 } from '../mocks';
+import { mockPnj, mockPlayer1, mockPlayer2 } from '../../__mocks__/mocks';
 
 describe('PnjUtils unit tests', () => {
   describe('isEnemyPnj', () => {

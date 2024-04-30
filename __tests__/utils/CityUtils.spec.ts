@@ -3,7 +3,7 @@ import {
   isAllyCity,
   _getCityFromListInHex
 } from '../../src/utils/CityUtils';
-import { mockCity, mockPlayer1, mockPlayer2 } from '../mocks';
+import { mockCity, mockPlayer1, mockPlayer2 } from '../../__mocks__/mocks';
 
 describe('CityUtils unit tests', () => {
   describe('isEnemyCity', () => {

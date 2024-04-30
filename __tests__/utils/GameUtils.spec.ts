@@ -1,5 +1,5 @@
 import { checkWinner } from '../../src/utils/GameUtils';
-import { mockPlayer1, mockPlayer2, mockCity } from '../mocks';
+import { mockPlayer1, mockPlayer2, mockCity } from '../../__mocks__/mocks';
 
 describe('GameUtils unit tests', () => {
   describe('checkWinner', () => {

@@ -6,7 +6,7 @@ import {
   parseCoordsFromHexId,
   parseHexIdFromCoords
 } from '../../src/utils/AdjacencyUtils';
-import { mockBoard } from '../mocks';
+import { mockBoard } from '../../__mocks__/mocks';
 
 describe('PnjUtils unit tests', () => {
   describe('checkCoordsInBoardBoundaries', () => {
