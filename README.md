@@ -6,6 +6,9 @@ Building a strategy game in React.js just to learn
 
 - React.js
 - EsLint
+- Prettier
+- Babel
+- Jest
 
 ## Running the project
 
