@@ -1,6 +1,5 @@
 import './App.scss';
 import React, { useState, useEffect, ReactElement } from 'react';
-import Button from 'react-bootstrap/Button';
 import * as _ from 'lodash';
 import Board from './components/Board/Board';
 
