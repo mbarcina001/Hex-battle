@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import Container from 'react-bootstrap/Container';
+import './Board.scss';
 
 import HexComp, { Hex } from '../Hex/Hex';
 import { Pnj } from '../Pnj/Pnj';
@@ -22,6 +22,7 @@ import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
 import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
+import ShopMenu from '../ShopMenu/ShopMenu';
 
 interface BoardProps {
   board: Hex[][];
@@ -46,7 +47,8 @@ export enum SELECTED_HEX_ACTION {
   MOVE_PNJ = 'MOVE_PNJ',
   SELECT_PNJ = 'SELECT_PNJ',
   CLEAR_SELECTED_PNJ = 'CLEAR_SELECTED_PNJ',
-  NO_ACTION = 'NO_ACTION'
+  NO_ACTION = 'NO_ACTION',
+  OPEN_SHOP = 'OPEN_SHOP'
 }
 
 function Board({
@@ -60,6 +62,7 @@ function Board({
     undefined
   );
   const [actionList, setActionList] = useState<ACTION_ENUM[]>([]);
+  const [showShop, setShowShop] = useState<boolean>(false);
 
   const activePlayer = useActivePlayerContext();
 
@@ -190,9 +193,11 @@ function Board({
     const actionToTrigger = getActionToTriggerInSelectedHex(
       selectedHex,
       activePlayer,
+      playerList,
       pnjInDestinationHex,
       selectedPnj
     );
+    setShowShop(false);
 
     switch (actionToTrigger) {
       case SELECTED_HEX_ACTION.HEAL_ALLY:
@@ -216,7 +221,8 @@ function Board({
       case SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ:
         setSelectedPnj(undefined);
         break;
-      case SELECTED_HEX_ACTION.NO_ACTION:
+      case SELECTED_HEX_ACTION.OPEN_SHOP:
+        setShowShop(true);
         break;
       default:
         break;
@@ -295,7 +301,7 @@ function Board({
   }, [selectedHex]);
 
   return (
-    <Container>
+    <>
       {board?.map((boardRow) => (
         <div className="d-flex justify-content-md-center" key={boardRow[0].id}>
           {boardRow.map((boardHex) => (
@@ -314,8 +320,12 @@ function Board({
           ))}
         </div>
       ))}
-      <ActionMenu actionList={actionList} triggerAction={triggerAction} />
-    </Container>
+
+      <div className="right-menu">
+        <ActionMenu actionList={actionList} triggerAction={triggerAction} />
+        {showShop ? <ShopMenu /> : ''}
+      </div>
+    </>
   );
 }
 

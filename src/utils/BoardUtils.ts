@@ -3,6 +3,7 @@ import { BOARD_TYPES } from '../App.constants';
 import { SELECTED_HEX_ACTION, SelectedPnj } from '../components/Board/Board';
 import { Hex } from '../components/Hex/Hex';
 import { Pnj } from '../components/Pnj/Pnj';
+import { getCityInHex } from './CityUtils';
 import { isAllyPnj, isEnemyPnj } from './PnjUtils';
 
 /**
@@ -34,6 +35,7 @@ export function getInitialBoard(): Hex[][] {
 export function getActionToTriggerInSelectedHex(
   selectedHexId: string,
   activePlayer: Player,
+  playerList: Player[],
   pnjInDestinationHex?: Pnj,
   selectedPnj?: SelectedPnj
 ): SELECTED_HEX_ACTION {
@@ -52,6 +54,11 @@ export function getActionToTriggerInSelectedHex(
       return SELECTED_HEX_ACTION.MOVE_PNJ;
     }
   } else if (
+    !pnjInDestinationHex &&
+    getCityInHex(selectedHexId, playerList)?.owner.id === activePlayer.playerId
+  ) {
+    return SELECTED_HEX_ACTION.OPEN_SHOP;
+  } else if (
     pnjInDestinationHex &&
     isAllyPnj(pnjInDestinationHex, activePlayer) &&
     pnjInDestinationHex.canMove
@@ -60,6 +67,4 @@ export function getActionToTriggerInSelectedHex(
   } else {
     return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
   }
-
-  return SELECTED_HEX_ACTION.NO_ACTION;
 }

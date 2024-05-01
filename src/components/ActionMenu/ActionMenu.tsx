@@ -1,6 +1,4 @@
 import React, { ReactElement } from 'react';
-
-import './ActionMenu.scss';
 import Button from 'react-bootstrap/Button';
 
 export enum ACTION_ENUM {
@@ -85,10 +83,10 @@ function ActionMenu({
   }
 
   return (
-    <div className="action-menu-container">
+    <>
       <h4>Actions:</h4>
-      <div className="action-menu">{getActionButtons()}</div>
-    </div>
+      <div className="menu">{getActionButtons()}</div>
+    </>
   );
 }
 
