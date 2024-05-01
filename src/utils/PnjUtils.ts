@@ -59,7 +59,7 @@ export function calcHealPower(healer: Pnj): number {
 }
 
 /**
- * Gets hex's occupant pnj from received pnjListif any
+ * Gets hex's occupant pnj from received pnjList if any
  * @param {string} hexId
  * @param {Player[]} playerList
  * @returns {Pnj | undefined}
@@ -95,4 +95,37 @@ export function getPnjInHex(
   }
 
   return undefined;
+}
+
+export function healPnj(healerPnj: Pnj, restoredPnj: Pnj): void {
+  restoredPnj.healthPoints += calcHealPower(healerPnj);
+
+  if (restoredPnj.healthPoints > MAX_HEALTH_POINTS) {
+    restoredPnj.healthPoints = MAX_HEALTH_POINTS + 3;
+  }
+
+  healerPnj.canMove = false;
+}
+
+export function performAttack(attackingPnj: Pnj, attackedPnj: Pnj): boolean {
+  attackedPnj.healthPoints -= calcDamage(attackingPnj, attackedPnj);
+  return attackedPnj.healthPoints <= 0;
+}
+
+export function performCounterAttack(
+  attackingPnj: Pnj,
+  attackedPnj: Pnj
+): boolean {
+  attackedPnj.healthPoints -= calcCounterDamage(attackingPnj, attackedPnj);
+  return attackedPnj.healthPoints <= 0;
+}
+
+export function withdrawPnj(pnjToWithdraw: Pnj, pnjOwner: Player): void {
+  pnjOwner.pnjList = pnjOwner.pnjList.filter(
+    (pnj: Pnj) => pnj.id !== pnjToWithdraw.id
+  );
+}
+
+export function findPnjById(pnjList: Pnj[], pnjId: string): Pnj | undefined {
+  return pnjList.find((playerPnj) => playerPnj.id === pnjId);
 }

@@ -18,7 +18,6 @@ export interface Owner {
 interface HexProps {
   hex: Hex;
   isSelected: boolean;
-  isVisible: boolean;
   isDestinationHex: boolean;
   pnjInHex?: Pnj;
   cityInHex?: City;
@@ -29,7 +28,6 @@ interface HexProps {
 function HexComp({
   hex,
   isSelected,
-  isVisible,
   isDestinationHex,
   pnjInHex,
   cityInHex,
@@ -38,16 +36,29 @@ function HexComp({
   const activePlayer = useActivePlayerContext();
 
   /**
+   * Returns if hex is visible for active player
+   * @param {string} hexId
+   * @returns {boolean}
+   */
+  function isHexVisible(): boolean {
+    return activePlayer.visibleHexsIds.includes(hex.id);
+  }
+
+  /**
    * Handles click event
    * Sets this Hex as selected if it is visible for active player
    */
   function handleHexClick(): void {
-    if (isVisible) {
+    if (isHexVisible()) {
       setAsSelected(hex.id);
     }
   }
 
-  function getBorderColorClass(): string {
+  /**
+   * Get css clas for destination hex
+   * @returns {string}
+   */
+  function getDestinationHexBackgroundColorClass(): string {
     if (isDestinationHex && pnjInHex) {
       if (isAllyPnj(pnjInHex, activePlayer)) {
         return 'ally';
@@ -65,14 +76,14 @@ function HexComp({
 
   return (
     <div
-      className={`hex ${isVisible ? hex.type : 'ofuscated'}
-        ${getBorderColorClass()}
+      className={`hex ${isHexVisible() ? hex.type : 'ofuscated'}
+        ${getDestinationHexBackgroundColorClass()}
         ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
     >
       <div className="hex-content">
-        {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
-        {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
+        {pnjInHex && isHexVisible() ? <PnjComp pnj={pnjInHex} /> : ''}
+        {cityInHex && isHexVisible() ? <CityComp city={cityInHex} /> : ''}
       </div>
     </div>
   );

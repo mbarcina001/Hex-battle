@@ -8,19 +8,20 @@ import { useActivePlayerContext } from '../../context/ActivePlayerContext/Active
 
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils';
 import {
-  MAX_HEALTH_POINTS,
   isEnemyPnj,
   isAllyPnj,
-  calcDamage,
-  calcHealPower,
-  calcCounterDamage,
-  getPnjInHex
+  getPnjInHex,
+  healPnj,
+  performAttack,
+  performCounterAttack,
+  withdrawPnj
 } from '../../utils/PnjUtils';
 
 import { Player } from '../../App';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
 import { getCityInHex, isEnemyCity } from '../../utils/CityUtils';
+import { findPlayerById } from '../../utils/PlayerUtils';
 
 interface BoardProps {
   board: Hex[][];
@@ -62,63 +63,49 @@ function Board({
     return getAdjacentHexIds(pnjInHex.hexLocationId, board);
   }
 
-  function isHexVisible(hexId: string): boolean {
-    return activePlayer.visibleHexsIds.includes(hexId);
-  }
-
   /**
    * Heals received pnj
    * @param {Pnj} healerPnj
    * @param {Pnj} restoredPnj
    */
-  function healPnj(healerPnj: Pnj, restoredPnj: Pnj): void {
-    restoredPnj.healthPoints += calcHealPower(healerPnj);
-
-    if (restoredPnj.healthPoints > MAX_HEALTH_POINTS) {
-      restoredPnj.healthPoints = MAX_HEALTH_POINTS;
-    }
-
-    healerPnj.canMove = false;
+  function healAlly(healerPnj: Pnj, restoredPnj: Pnj): void {
+    healPnj(healerPnj, restoredPnj);
     updatePlayers([activePlayer]);
   }
 
   /**
-   * Attacks received pnj
+   * pnj attacks another pnj
+   *  if kills => withdraw attacked pnj
+   *  else => attacked pnj performs counter
+   *    if kills => withdraw attacking pnj
    * @param {Pnj} attackingPnj
    * @param {Pnj} attackedPnj
    */
   function attackPnj(attackingPnj: Pnj, attackedPnj: Pnj): void {
-    const defenderOwner = playerList.find(
-      (player) => player.playerId === attackedPnj.owner.id
-    );
+    const attackerOwner = findPlayerById(playerList, attackingPnj.owner.id);
+    const defenderOwner = findPlayerById(playerList, attackedPnj.owner.id);
 
-    if (!defenderOwner) {
+    if (!attackerOwner || !defenderOwner) {
       return;
     }
 
-    attackedPnj.healthPoints -= calcDamage(attackingPnj, attackedPnj);
+    let isPnjDead = performAttack(attackingPnj, attackedPnj);
 
-    if (attackedPnj.healthPoints <= 0) {
-      defenderOwner.pnjList = defenderOwner.pnjList.filter(
-        (pnj) => pnj.id !== attackedPnj.id
-      );
+    if (isPnjDead) {
+      withdrawPnj(attackedPnj, defenderOwner);
       movePnj(attackingPnj, selectedHex, false);
-      attackingPnj.canMove = false;
       updatePlayers([activePlayer, defenderOwner]);
       return;
     }
 
-    attackingPnj.healthPoints -= calcCounterDamage(attackedPnj, attackingPnj);
+    attackingPnj.canMove = false;
+    isPnjDead = performCounterAttack(attackedPnj, attackingPnj);
 
-    if (attackedPnj.healthPoints <= 0) {
-      defenderOwner.pnjList = defenderOwner.pnjList.filter(
-        (pnj) => pnj.id !== attackedPnj.id
-      );
-      movePnj(attackingPnj, selectedHex, false);
+    if (isPnjDead) {
+      withdrawPnj(attackingPnj, attackerOwner);
     }
 
-    attackingPnj.canMove = false;
-    updatePlayers([activePlayer, defenderOwner]);
+    updatePlayers([activePlayer, defenderOwner, attackerOwner]);
   }
 
   /**
@@ -145,32 +132,25 @@ function Board({
 
   /**
    * Moves received pnj to received location
-   * @param {Pnj} SelectedPnj
+   * @param {Pnj} selectedPnj
    * @param {string} locationToMove
    * @param {boolean} callUpdate
    */
   function movePnj(
-    SelectedPnj: Pnj,
+    pnjToMove: Pnj,
     locationToMove: string,
     callUpdate = true
   ): void {
-    const pnj = activePlayer.pnjList.find(
-      (playerPnj) => playerPnj.id === SelectedPnj.id
-    );
+    pnjToMove.canMove = false;
+    pnjToMove.hexLocationId = locationToMove;
+    addNewVisibleHexsAfterMovement(locationToMove);
 
-    if (pnj) {
-      pnj.canMove = false;
-      pnj.hexLocationId = locationToMove;
-      addNewVisibleHexsAfterMovement(locationToMove);
-
-      if (callUpdate) {
-        updatePlayers([activePlayer]);
-      }
+    if (callUpdate) {
+      updatePlayers([activePlayer]);
     }
   }
 
   function addNewVisibleHexsAfterMovement(newLocation: string): void {
-    // eslint-disable-next-line no-restricted-syntax
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
       if (!activePlayer.visibleHexsIds.includes(hexId)) {
         activePlayer.visibleHexsIds.push(hexId);
@@ -191,7 +171,7 @@ function Board({
       selectedPnj?.destinationHexs?.includes(selectedHex)
     ) {
       if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer)) {
-        healPnj(selectedPnj.whichPnj, pnjInDestinationHex);
+        healAlly(selectedPnj.whichPnj, pnjInDestinationHex);
       } else if (
         pnjInDestinationHex &&
         isEnemyPnj(pnjInDestinationHex, activePlayer)
@@ -303,7 +283,6 @@ function Board({
               <HexComp
                 hex={boardHex}
                 isSelected={selectedHex === boardHex.id}
-                isVisible={isHexVisible(boardHex.id)}
                 isDestinationHex={
                   selectedPnj?.destinationHexs?.includes(boardHex.id) ?? false
                 }

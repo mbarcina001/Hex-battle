@@ -19,13 +19,11 @@ function ActionMenu({
   triggerAction
 }: ActionMenuProps): ReactElement {
   /**
-   * Returns action buttons
+   * Returns visible action buttons
    * @returns {any}
    */
   function getActionButtons(): ReactElement[] {
-    const buttons = [];
-
-    buttons.push(getEndTurnButton());
+    const buttons = [getEndTurnButton()];
 
     if (actionList.includes(ACTION_ENUM.HEAL_ACTIVE_PNJ)) {
       buttons.push(getHealButton());

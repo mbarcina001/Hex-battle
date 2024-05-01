@@ -72,6 +72,19 @@ export function getInitialPlayer(
 }
 
 /**
+ * Finds player in received player list
+ * @param {Player[]} playerList
+ * @param {number} playerId
+ * @returns {Player | undefined}
+ */
+export function findPlayerById(
+  playerList: Player[],
+  playerId: number
+): Player | undefined {
+  return playerList.find((player) => player.playerId === playerId);
+}
+
+/**
  * Returns a dummy player
  * @returns {Player}
  */
