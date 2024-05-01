@@ -110,7 +110,7 @@ function App(): ReactElement {
    */
   function getMainContent(): ReactElement {
     return winner ? (
-      <p>{`Ganador: Jugador ${winner.playerId}`}</p>
+      <p>{`Winner: Player ${winner.playerId}`}</p>
     ) : (
       <Board
         board={board}

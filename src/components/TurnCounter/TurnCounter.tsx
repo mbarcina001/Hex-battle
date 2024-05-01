@@ -13,10 +13,10 @@ function TurnCounter({ turnNumber }: TurnCounterProps): ReactElement {
 
   return (
     <h4 className="counter">
-      <span>{`Turno: ${turnNumber} -`}</span>
+      <span>{`Turn: ${turnNumber} -`}</span>
       <span>&nbsp;</span>
       <span style={{ color: activePlayer.playerColor }}>
-        {`Jugador: ${activePlayer.playerId}`}
+        {`Player: ${activePlayer.playerId}`}
       </span>
     </h4>
   );
