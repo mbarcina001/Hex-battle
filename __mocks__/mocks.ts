@@ -1,9 +1,9 @@
 import { Player } from '../src/App';
 import { City } from '../src/components/City/City';
 import { Hex } from '../src/components/Hex/Hex';
-import { Pnj, PnjOwner } from '../src/components/Pnj/Pnj';
+import { Pnj, Owner } from '../src/components/Pnj/Pnj';
 
-const mockOwner: PnjOwner = {
+const mockOwner: Owner = {
   id: 1,
   color: 'red'
 };

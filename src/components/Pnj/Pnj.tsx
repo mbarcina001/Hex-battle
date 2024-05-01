@@ -5,16 +5,12 @@ import { useActivePlayerContext } from '../../context/ActivePlayerContext/Active
 import { isAllyPnj } from '../../utils/PnjUtils';
 
 import './Pnj.scss';
-
-export interface PnjOwner {
-  id: number;
-  color: string;
-}
+import { Owner } from '../Hex/Hex';
 
 export interface Pnj {
   type: string;
   id: string;
-  owner: PnjOwner;
+  owner: Owner;
   canMove: boolean;
   hexLocationId: string;
   attack: number;
@@ -37,12 +33,13 @@ function PnjComp({ pnj }: PnjCompProps): ReactElement {
   }, [pnj, pnj.canMove, activePlayer]);
 
   return (
-    <span
-      className={`${isPnjInactive ? 'inactive' : ''}`}
+    <div
+      className={`${isPnjInactive ? 'inactive' : ''} pnj`}
       style={{ color: pnj.owner.color }}
     >
-      {`Id: ${pnj.id} - Hp: ${pnj.healthPoints}`}
-    </span>
+      <span>{`Id: ${pnj.id}`}</span>
+      <span>{`Hp: ${pnj.healthPoints}`}</span>
+    </div>
   );
 }
 

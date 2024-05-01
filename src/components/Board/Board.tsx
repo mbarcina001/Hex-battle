@@ -234,7 +234,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
 
           if (cityInHex) {
             const owner = playerList.find(
-              (player) => player.playerId === cityInHex?.ownerId
+              (player) => player.playerId === cityInHex?.owner.id
             );
 
             if (owner) {
@@ -291,9 +291,9 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
   return (
     <Container>
       {board?.map((boardRow) => (
-        <Row className="justify-content-md-center" key={boardRow[0].id}>
+        <div className="d-flex justify-content-md-center" key={boardRow[0].id}>
           {boardRow.map((boardHex) => (
-            <Col key={boardHex.id} xs lg="1">
+            <div key={boardHex.id}>
               <HexComp
                 hex={boardHex}
                 isSelected={selectedHex === boardHex.id}
@@ -305,9 +305,9 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
                 cityInHex={getCityInHex(boardHex.id, playerList)}
                 setAsSelected={setSelectedHex}
               />
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
       ))}
       <ActionMenu actionList={actionList} triggerAction={() => triggerAction} />
     </Container>

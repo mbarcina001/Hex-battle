@@ -16,6 +16,7 @@ import {
   getInitialPlayer
 } from './utils/PlayerUtils';
 import { checkWinner } from './utils/GameUtils';
+import TurnCounter from './components/TurnCounter/TurnCounter';
 
 export interface Player {
   playerId: number;
@@ -154,13 +155,9 @@ function App(): ReactElement {
     <ActivePlayerContext.Provider
       value={getActivePlayer(playerList, activePlayerId) ?? getDummyPlayer()}
     >
-      <p>{`Turno: ${actualTurn} - Jugador: ${activePlayerId}`}</p>
+      <TurnCounter turnNumber={actualTurn}></TurnCounter>
 
-      {getMainContent()}
-
-      <Button variant="danger" onClick={() => changeTurn()}>
-        Fin del turno
-      </Button>
+      <div className="main-content">{getMainContent()}</div>
     </ActivePlayerContext.Provider>
   );
 }

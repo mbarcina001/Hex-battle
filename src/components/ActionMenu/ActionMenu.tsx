@@ -1,18 +1,16 @@
 import React, { ReactElement } from 'react';
 
 import './ActionMenu.scss';
-import { Button } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
 
 export enum ACTION_ENUM {
-  // eslint-disable-next-line no-unused-vars
   HEAL_ACTIVE_PNJ = 'HEAL_ACTIVE_PNJ',
-  // eslint-disable-next-line no-unused-vars
-  CAPTURE_CITY = 'CAPTURE_CITY'
+  CAPTURE_CITY = 'CAPTURE_CITY',
+  END_TURN = 'END_TURN'
 }
 
 export interface ActionMenuProps {
   actionList: ACTION_ENUM[];
-  // eslint-disable-next-line no-unused-vars
   triggerAction: (action: ACTION_ENUM) => void;
 }
 
@@ -27,38 +25,73 @@ function ActionMenu({
   function getActionButtons(): ReactElement[] {
     const buttons = [];
 
+    buttons.push(getEndTurnButton());
+
     if (actionList.includes(ACTION_ENUM.HEAL_ACTIVE_PNJ)) {
-      buttons.push(
-        <Button
-          key="heal-button"
-          variant="sucess"
-          onClick={() => triggerAction(ACTION_ENUM.HEAL_ACTIVE_PNJ)}
-        >
-          Heal
-        </Button>
-      );
+      buttons.push(getHealButton());
     }
 
     if (actionList.includes(ACTION_ENUM.CAPTURE_CITY)) {
-      buttons.push(
-        <Button
-          key="capture-button"
-          variant="sucess"
-          onClick={() => triggerAction(ACTION_ENUM.CAPTURE_CITY)}
-        >
-          Capture
-        </Button>
-      );
-    }
-
-    if (!buttons.length) {
-      buttons.push(<span key="no-action">No action</span>);
+      buttons.push(getCaptureButton());
     }
 
     return buttons;
   }
 
-  return <div className="action-menu">{getActionButtons()}</div>;
+  /**
+   * Get end turn button
+   * @returns {ReactElement}
+   */
+  function getEndTurnButton(): ReactElement {
+    return (
+      <Button
+        key="end-turn-button"
+        variant="danger"
+        onClick={() => triggerAction(ACTION_ENUM.END_TURN)}
+      >
+        End turn
+      </Button>
+    );
+  }
+
+  /**
+   * Get heal pnj button
+   * @returns {ReactElement}
+   */
+  function getHealButton(): ReactElement {
+    return (
+      <Button
+        key="heal-button"
+        variant="success"
+        onClick={() => triggerAction(ACTION_ENUM.HEAL_ACTIVE_PNJ)}
+      >
+        Heal
+      </Button>
+    );
+  }
+
+  /**
+   * Get city capture button
+   * @returns {ReactElement}
+   */
+  function getCaptureButton(): ReactElement {
+    return (
+      <Button
+        key="capture-button"
+        variant="dark"
+        onClick={() => triggerAction(ACTION_ENUM.CAPTURE_CITY)}
+      >
+        Capture
+      </Button>
+    );
+  }
+
+  return (
+    <div className="action-menu-container">
+      <h4>Actions:</h4>
+      <div className="action-menu">{getActionButtons()}</div>
+    </div>
+  );
 }
 
 export default ActionMenu;

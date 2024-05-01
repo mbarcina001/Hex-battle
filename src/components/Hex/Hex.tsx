@@ -10,6 +10,11 @@ export interface Hex {
   type: string;
 }
 
+export interface Owner {
+  id: number;
+  color: string;
+}
+
 interface HexProps {
   hex: Hex;
   isSelected: boolean;
@@ -65,8 +70,10 @@ function HexComp({
         ${isSelected ? 'selected' : ''}`}
       onClick={handleHexClick}
     >
-      {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
-      {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
+      <div className="hex-content">
+        {pnjInHex && isVisible ? <PnjComp pnj={pnjInHex} /> : ''}
+        {cityInHex && isVisible ? <CityComp city={cityInHex} /> : ''}
+      </div>
     </div>
   );
 }

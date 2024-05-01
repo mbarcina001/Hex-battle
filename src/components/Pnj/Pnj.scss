@@ -1,3 +1,11 @@
-.inactive {
-  opacity: 0.75;
+
+.pnj {
+  &.inactive {
+    opacity: 0.75;
+  }
+  
+  span {
+    display: block;
+  }
 }
+

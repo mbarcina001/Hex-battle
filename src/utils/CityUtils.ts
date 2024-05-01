@@ -8,7 +8,7 @@ import { City } from '../components/City/City';
  * @returns {boolean}
  */
 export function isEnemyCity(city: City, activePlayer: Player): boolean {
-  return city.ownerId !== activePlayer.playerId;
+  return city.owner.id !== activePlayer.playerId;
 }
 
 /**
@@ -18,7 +18,7 @@ export function isEnemyCity(city: City, activePlayer: Player): boolean {
  * @returns {boolean}
  */
 export function isAllyCity(city: City, activePlayer: Player): boolean {
-  return city.ownerId === activePlayer.playerId;
+  return city.owner.id === activePlayer.playerId;
 }
 
 /**

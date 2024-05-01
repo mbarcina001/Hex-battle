@@ -37,7 +37,10 @@ export function getInitialPlayer(
   const firstCity: City = {
     id: `cit_${playerId}`,
     name: `City ${playerId}`,
-    ownerId: playerId,
+    owner: {
+      id: playerId,
+      color: playerColor
+    },
     hexLocationId: getRandomHexLocationId(board)
   };
 
