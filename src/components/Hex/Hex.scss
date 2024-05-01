@@ -10,26 +10,6 @@
     flex-direction: column;
     transform: rotate(-90deg);
   }
-
-  &.selected {
-    border-color: lightblue;
-  }
-
-  &.destination {
-    border-color: blue;
-  }
-
-  &.enemy {
-    border-color: red;
-  }
-
-  &.ally {
-    border-color: green;
-  }
-
-  &.ofuscated {
-    background-color: grey;
-  }
   
   &.grass {
     background-color: green;
@@ -37,6 +17,26 @@
   
   &.desert {
     background-color: sandybrown;
+  }
+
+  &.destination {
+    background-color: blue;
+  }
+
+  &.enemy {
+    background-color: red;
+  }
+
+  &.ally {
+    background-color: green;
+  }
+
+  &.selected {
+    background-color: lightblue;
+  }
+
+  &.ofuscated {
+    background-color: grey;
   }
 }
 
