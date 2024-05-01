@@ -107,6 +107,11 @@ export function healPnj(healerPnj: Pnj, restoredPnj: Pnj): void {
   healerPnj.canMove = false;
 }
 
+export function healSelf(pnjToHeal: Pnj): void {
+  pnjToHeal.healthPoints += 3;
+  pnjToHeal.canMove = false;
+}
+
 export function performAttack(attackingPnj: Pnj, attackedPnj: Pnj): boolean {
   attackedPnj.healthPoints -= calcDamage(attackingPnj, attackedPnj);
   return attackedPnj.healthPoints <= 0;

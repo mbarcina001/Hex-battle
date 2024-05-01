@@ -8,20 +8,20 @@ import { useActivePlayerContext } from '../../context/ActivePlayerContext/Active
 
 import { getAdjacentHexIds } from '../../utils/AdjacencyUtils';
 import {
-  isEnemyPnj,
-  isAllyPnj,
   getPnjInHex,
   healPnj,
   performAttack,
   performCounterAttack,
-  withdrawPnj
+  withdrawPnj,
+  healSelf
 } from '../../utils/PnjUtils';
 
 import { Player } from '../../App';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
-import { getCityInHex, isEnemyCity } from '../../utils/CityUtils';
+import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
+import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
 
 interface BoardProps {
   board: Hex[][];
@@ -38,6 +38,15 @@ export interface SelectedPnj {
 export interface VisibleHexsByPlayer {
   playerId: number;
   visibleHexsIds: string[];
+}
+
+export enum SELECTED_HEX_ACTION {
+  HEAL_ALLY = 'HEAL_ALLY',
+  ATTACK_ENEMY = 'ATTACK_ENEMY',
+  MOVE_PNJ = 'MOVE_PNJ',
+  SELECT_PNJ = 'SELECT_PNJ',
+  CLEAR_SELECTED_PNJ = 'CLEAR_SELECTED_PNJ',
+  NO_ACTION = 'NO_ACTION'
 }
 
 function Board({
@@ -65,10 +74,13 @@ function Board({
 
   /**
    * Heals received pnj
-   * @param {Pnj} healerPnj
-   * @param {Pnj} restoredPnj
+   * @param {Pnj | undefined} healerPnj
+   * @param {Pnj | undefined} restoredPnj
    */
-  function healAlly(healerPnj: Pnj, restoredPnj: Pnj): void {
+  function healAlly(healerPnj?: Pnj, restoredPnj?: Pnj): void {
+    if (!healerPnj || !restoredPnj) {
+      return;
+    }
     healPnj(healerPnj, restoredPnj);
     updatePlayers([activePlayer]);
   }
@@ -78,10 +90,14 @@ function Board({
    *  if kills => withdraw attacked pnj
    *  else => attacked pnj performs counter
    *    if kills => withdraw attacking pnj
-   * @param {Pnj} attackingPnj
-   * @param {Pnj} attackedPnj
+   * @param {Pnj | undefined} attackingPnj
+   * @param {Pnj | undefined} attackedPnj
    */
-  function attackPnj(attackingPnj: Pnj, attackedPnj: Pnj): void {
+  function attackPnj(attackingPnj?: Pnj, attackedPnj?: Pnj): void {
+    if (!attackingPnj || !attackedPnj) {
+      return;
+    }
+
     const attackerOwner = findPlayerById(playerList, attackingPnj.owner.id);
     const defenderOwner = findPlayerById(playerList, attackedPnj.owner.id);
 
@@ -110,9 +126,12 @@ function Board({
 
   /**
    * Moves given pnj to selected hex
-   * @param {Pnj} pnjToMove
+   * @param {Pnj | undefined} pnjToMove
    */
-  function movePnjToDestination(pnjToMove: Pnj): void {
+  function movePnjToDestination(pnjToMove?: Pnj): void {
+    if (!pnjToMove) {
+      return;
+    }
     movePnj(pnjToMove, selectedHex);
     setSelectedHex('');
     setSelectedPnj(undefined);
@@ -121,12 +140,15 @@ function Board({
 
   /**
    * Sets pnj to move next
-   * @param {Pnj} SelectedPnj
+   * @param {Pnj | undefined} selectedPnj
    */
-  function selectPnj(SelectedPnj: Pnj): void {
+  function selectPnj(selectedPnj?: Pnj): void {
+    if (!selectedPnj) {
+      return;
+    }
     setSelectedPnj({
-      whichPnj: SelectedPnj,
-      destinationHexs: getPnjAdjacentHexs(SelectedPnj)
+      whichPnj: selectedPnj,
+      destinationHexs: getPnjAdjacentHexs(selectedPnj)
     });
   }
 
@@ -154,9 +176,9 @@ function Board({
     for (const hexId of getAdjacentHexIds(newLocation, board)) {
       if (!activePlayer.visibleHexsIds.includes(hexId)) {
         activePlayer.visibleHexsIds.push(hexId);
-        updatePlayers([activePlayer]);
       }
     }
+    updatePlayers([activePlayer]);
   }
 
   /**
@@ -165,32 +187,39 @@ function Board({
    */
   function triggerSelectedHexActions(): void {
     const pnjInDestinationHex = getPnjInHex(selectedHex, playerList);
+    const actionToTrigger = getActionToTriggerInSelectedHex(
+      selectedHex,
+      activePlayer,
+      pnjInDestinationHex,
+      selectedPnj
+    );
 
-    if (
-      selectedPnj?.whichPnj.canMove &&
-      selectedPnj?.destinationHexs?.includes(selectedHex)
-    ) {
-      if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer)) {
-        healAlly(selectedPnj.whichPnj, pnjInDestinationHex);
-      } else if (
-        pnjInDestinationHex &&
-        isEnemyPnj(pnjInDestinationHex, activePlayer)
-      ) {
-        attackPnj(selectedPnj.whichPnj, pnjInDestinationHex);
-      } else {
-        movePnjToDestination(selectedPnj.whichPnj);
-      }
-
-      setSelectedPnj(undefined);
-      setSelectedHex('');
-    } else if (
-      pnjInDestinationHex &&
-      isAllyPnj(pnjInDestinationHex, activePlayer) &&
-      pnjInDestinationHex.canMove
-    ) {
-      selectPnj(pnjInDestinationHex);
-    } else {
-      setSelectedPnj(undefined);
+    switch (actionToTrigger) {
+      case SELECTED_HEX_ACTION.HEAL_ALLY:
+        healAlly(selectedPnj?.whichPnj, pnjInDestinationHex);
+        setSelectedPnj(undefined);
+        setSelectedHex('');
+        break;
+      case SELECTED_HEX_ACTION.ATTACK_ENEMY:
+        attackPnj(selectedPnj?.whichPnj, pnjInDestinationHex);
+        setSelectedPnj(undefined);
+        setSelectedHex('');
+        break;
+      case SELECTED_HEX_ACTION.MOVE_PNJ:
+        movePnjToDestination(selectedPnj?.whichPnj);
+        setSelectedPnj(undefined);
+        setSelectedHex('');
+        break;
+      case SELECTED_HEX_ACTION.SELECT_PNJ:
+        selectPnj(pnjInDestinationHex);
+        break;
+      case SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ:
+        setSelectedPnj(undefined);
+        break;
+      case SELECTED_HEX_ACTION.NO_ACTION:
+        break;
+      default:
+        break;
     }
   }
 
@@ -202,38 +231,29 @@ function Board({
     switch (action) {
       case ACTION_ENUM.HEAL_ACTIVE_PNJ:
         if (selectedPnj) {
-          selectedPnj.whichPnj.healthPoints += 3;
-          selectedPnj.whichPnj.canMove = false;
+          healSelf(selectedPnj.whichPnj);
           updatePlayers([activePlayer]);
         }
         break;
       case ACTION_ENUM.CAPTURE_CITY:
-        if (selectedPnj) {
-          const cityInHex = getCityInHex(
-            selectedPnj.whichPnj.hexLocationId,
-            playerList
+        if (!selectedPnj) {
+          break;
+        }
+        const cityToCapture = getCityInHex(
+          selectedPnj.whichPnj.hexLocationId,
+          playerList
+        );
+
+        if (cityToCapture) {
+          const playersToUpdate = captureCity(
+            cityToCapture,
+            playerList,
+            activePlayer
           );
-          const playersToUpdate = [];
-
-          if (cityInHex) {
-            const owner = playerList.find(
-              (player) => player.playerId === cityInHex?.owner.id
-            );
-
-            if (owner) {
-              owner.cityList = owner.cityList.filter(
-                (city) => city.id !== cityInHex.id
-              );
-              playersToUpdate.push(owner);
-            }
-
-            activePlayer.cityList.push(cityInHex);
-            selectedPnj.whichPnj.canMove = false;
-            playersToUpdate.push(activePlayer);
-          }
-
+          selectedPnj.whichPnj.canMove = false;
           updatePlayers(playersToUpdate);
         }
+
         break;
       case ACTION_ENUM.END_TURN:
         changeTurn();

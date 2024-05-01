@@ -59,3 +59,36 @@ export function getCityInHex(
 
   return undefined;
 }
+
+/**
+ * Changes received city ownership to receiving capturing player
+ * @param {City} cityToCapture
+ * @param {Player[]} playerList
+ * @param {Player} capturingPlayer
+ * @returns {Player[]}
+ */
+export function captureCity(
+  cityToCapture: City,
+  playerList: Player[],
+  capturingPlayer: Player
+): Player[] {
+  const playersToUpdate = [];
+  const owner = playerList.find(
+    (player) => player.playerId === cityToCapture?.owner.id
+  );
+
+  if (owner) {
+    owner.cityList = owner.cityList.filter(
+      (city) => city.id !== cityToCapture.id
+    );
+    playersToUpdate.push(owner);
+  }
+
+  cityToCapture.owner = {
+    id: capturingPlayer.playerId,
+    color: capturingPlayer.playerColor
+  };
+  capturingPlayer.cityList.push(cityToCapture);
+  playersToUpdate.push(capturingPlayer);
+  return playersToUpdate;
+}
