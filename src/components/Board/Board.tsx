@@ -1,7 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 
 import HexComp, { Hex } from '../Hex/Hex';
 import { Pnj } from '../Pnj/Pnj';
@@ -27,8 +25,8 @@ import { getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 interface BoardProps {
   board: Hex[][];
   playerList: Player[];
-  // eslint-disable-next-line no-unused-vars
   updatePlayers: (playerList: Player[]) => void;
+  changeTurn: () => void;
 }
 
 export interface SelectedPnj {
@@ -41,7 +39,12 @@ export interface VisibleHexsByPlayer {
   visibleHexsIds: string[];
 }
 
-function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
+function Board({
+  board,
+  playerList,
+  updatePlayers,
+  changeTurn
+}: BoardProps): ReactElement {
   const [selectedHex, setSelectedHex] = useState<string>('');
   const [selectedPnj, setSelectedPnj] = useState<SelectedPnj | undefined>(
     undefined
@@ -252,6 +255,9 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
           updatePlayers(playersToUpdate);
         }
         break;
+      case ACTION_ENUM.END_TURN:
+        changeTurn();
+        break;
       default:
         break;
     }
@@ -309,7 +315,7 @@ function Board({ board, playerList, updatePlayers }: BoardProps): ReactElement {
           ))}
         </div>
       ))}
-      <ActionMenu actionList={actionList} triggerAction={() => triggerAction} />
+      <ActionMenu actionList={actionList} triggerAction={triggerAction} />
     </Container>
   );
 }

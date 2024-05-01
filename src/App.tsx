@@ -115,7 +115,8 @@ function App(): ReactElement {
       <Board
         board={board}
         playerList={playerList}
-        updatePlayers={() => updatePlayers}
+        updatePlayers={updatePlayers}
+        changeTurn={changeTurn}
       />
     );
   }
