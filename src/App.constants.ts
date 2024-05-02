@@ -9,3 +9,15 @@ export const BOARD_TYPES = [
   ['grass', 'desert', 'desert', 'desert'],
   ['desert', 'desert', 'desert']
 ];
+
+export const CITY_NAMES = [
+  'Babylon',
+  'Constantinople',
+  'Alexandria',
+  'Athens',
+  'Sparta',
+  'London',
+  'Paris',
+  'Rome',
+  'Cairo'
+];

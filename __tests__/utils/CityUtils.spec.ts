@@ -1,8 +1,4 @@
-import {
-  isEnemyCity,
-  isAllyCity,
-  _getCityFromListInHex
-} from '../../src/utils/CityUtils';
+import { isEnemyCity, isAllyCity } from '../../src/utils/CityUtils';
 import { mockCity, mockPlayer1, mockPlayer2 } from '../../__mocks__/mocks';
 
 describe('CityUtils unit tests', () => {
@@ -27,18 +23,6 @@ describe('CityUtils unit tests', () => {
     it('returns false if received pnj is NOT ally of received active player', () => {
       const res = isAllyCity(mockCity, mockPlayer2);
       expect(res).toBeFalsy();
-    });
-  });
-
-  describe('_getPnjFromListInHex', () => {
-    it('returns found pnj', () => {
-      const res = _getCityFromListInHex('1_1', [mockCity]);
-      expect(res).toEqual(mockCity);
-    });
-
-    it('returns undefined if pnj not found', () => {
-      const res = _getCityFromListInHex('1_2', [mockCity]);
-      expect(res).toBeUndefined();
     });
   });
 });

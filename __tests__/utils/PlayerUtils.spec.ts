@@ -5,7 +5,7 @@ import {
   getInitialPlayer,
   getDummyPlayer
 } from '../../src/utils/PlayerUtils';
-import { mockBoard, mockPlayer1 } from '../../__mocks__/mocks';
+import { mockBoard, mockCity, mockPlayer1 } from '../../__mocks__/mocks';
 
 jest.mock('../../src/utils/HexUtils');
 jest.mock('../../src/utils/AdjacencyUtils');
@@ -45,7 +45,7 @@ describe('PlayerUtils unit tests', () => {
         '2_1'
       ]);
 
-      const res = getInitialPlayer(1, 'red', mockBoard);
+      const res = getInitialPlayer(1, 'red', mockBoard, [mockCity]);
 
       expect(res).toBeDefined();
       expect(res).toHaveProperty('playerId');
@@ -54,8 +54,6 @@ describe('PlayerUtils unit tests', () => {
       expect(res.playerColor).toEqual('red');
       expect(res).toHaveProperty('pnjList');
       expect(res.pnjList).toHaveLength(1);
-      expect(res).toHaveProperty('cityList');
-      expect(res.cityList).toHaveLength(1);
       expect(res).toHaveProperty('visibleHexsIds');
       expect(res.visibleHexsIds).toHaveLength(7);
     });

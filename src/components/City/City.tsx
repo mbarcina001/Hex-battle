@@ -4,7 +4,7 @@ import { Owner } from '../Hex/Hex';
 export interface City {
   name: string;
   id: string;
-  owner: Owner;
+  owner?: Owner;
   hexLocationId: string;
 }
 
@@ -13,7 +13,9 @@ interface CityCompProps {
 }
 
 function CityComp({ city }: CityCompProps): ReactElement {
-  return <span style={{ color: city.owner.color }}>{city.name}</span>;
+  return (
+    <span style={{ color: city.owner?.color ?? 'grey' }}>{city.name}</span>
+  );
 }
 
 export default CityComp;

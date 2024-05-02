@@ -23,9 +23,11 @@ import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
 import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
 import ShopMenu from '../ShopMenu/ShopMenu';
+import { City } from '../City/City';
 
 interface BoardProps {
   board: Hex[][];
+  cityList: City[];
   playerList: Player[];
   updatePlayers: (playerList: Player[]) => void;
   changeTurn: () => void;
@@ -53,6 +55,7 @@ export enum SELECTED_HEX_ACTION {
 
 function Board({
   board,
+  cityList,
   playerList,
   updatePlayers,
   changeTurn
@@ -193,7 +196,7 @@ function Board({
     const actionToTrigger = getActionToTriggerInSelectedHex(
       selectedHex,
       activePlayer,
-      playerList,
+      cityList,
       pnjInDestinationHex,
       selectedPnj
     );
@@ -247,17 +250,12 @@ function Board({
         }
         const cityToCapture = getCityInHex(
           selectedPnj.whichPnj.hexLocationId,
-          playerList
+          cityList
         );
 
         if (cityToCapture) {
-          const playersToUpdate = captureCity(
-            cityToCapture,
-            playerList,
-            activePlayer
-          );
+          captureCity(cityToCapture, activePlayer);
           selectedPnj.whichPnj.canMove = false;
-          updatePlayers(playersToUpdate);
         }
 
         break;
@@ -284,7 +282,7 @@ function Board({
 
       const cityInHex = getCityInHex(
         selectedPnj.whichPnj.hexLocationId,
-        playerList
+        cityList
       );
       if (cityInHex && isEnemyCity(cityInHex, activePlayer)) {
         actions.push(ACTION_ENUM.CAPTURE_CITY);
@@ -313,7 +311,7 @@ function Board({
                   selectedPnj?.destinationHexs?.includes(boardHex.id) ?? false
                 }
                 pnjInHex={getPnjInHex(boardHex.id, playerList)}
-                cityInHex={getCityInHex(boardHex.id, playerList)}
+                cityInHex={getCityInHex(boardHex.id, cityList)}
                 setAsSelected={setSelectedHex}
               />
             </div>

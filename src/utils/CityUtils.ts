@@ -1,5 +1,9 @@
 import { Player } from '../App';
+import { CITY_NAMES } from '../App.constants';
 import { City } from '../components/City/City';
+import { Hex } from '../components/Hex/Hex';
+import { getRandomHexLocationId } from './HexUtils';
+import { getRandomInt } from './Utils';
 
 /**
  * Calculates if received city is enemy of received active player
@@ -8,7 +12,7 @@ import { City } from '../components/City/City';
  * @returns {boolean}
  */
 export function isEnemyCity(city: City, activePlayer: Player): boolean {
-  return city.owner.id !== activePlayer.playerId;
+  return city.owner?.id !== activePlayer.playerId;
 }
 
 /**
@@ -18,25 +22,7 @@ export function isEnemyCity(city: City, activePlayer: Player): boolean {
  * @returns {boolean}
  */
 export function isAllyCity(city: City, activePlayer: Player): boolean {
-  return city.owner.id === activePlayer.playerId;
-}
-
-/**
- * Gets hex's occupant city from received pnjListif any
- * @param {string} hexId
- * @param {Player[]} playerList
- * @returns {City | undefined}
- */
-export function _getCityFromListInHex(
-  hexId: string,
-  pnjList: City[]
-): City | undefined {
-  return pnjList.find((pnj) => {
-    if (pnj.hexLocationId === hexId) {
-      return pnj;
-    }
-    return undefined;
-  });
+  return city.owner?.id === activePlayer.playerId;
 }
 
 /**
@@ -47,17 +33,9 @@ export function _getCityFromListInHex(
  */
 export function getCityInHex(
   hexId: string,
-  playerList: Player[]
+  cityList: City[]
 ): City | undefined {
-  // eslint-disable-next-line no-restricted-syntax
-  for (const player of playerList) {
-    const foundCity = _getCityFromListInHex(hexId, player.cityList);
-    if (foundCity) {
-      return foundCity;
-    }
-  }
-
-  return undefined;
+  return cityList.find((city) => city.hexLocationId === hexId);
 }
 
 /**
@@ -69,26 +47,48 @@ export function getCityInHex(
  */
 export function captureCity(
   cityToCapture: City,
-  playerList: Player[],
   capturingPlayer: Player
-): Player[] {
-  const playersToUpdate = [];
-  const owner = playerList.find(
-    (player) => player.playerId === cityToCapture?.owner.id
-  );
-
-  if (owner) {
-    owner.cityList = owner.cityList.filter(
-      (city) => city.id !== cityToCapture.id
-    );
-    playersToUpdate.push(owner);
-  }
-
+): void {
   cityToCapture.owner = {
     id: capturingPlayer.playerId,
     color: capturingPlayer.playerColor
   };
-  capturingPlayer.cityList.push(cityToCapture);
-  playersToUpdate.push(capturingPlayer);
-  return playersToUpdate;
+}
+
+export function getInitialCity(
+  alreadyExistingCities: City[],
+  board: Hex[][]
+): City {
+  return {
+    name: _getCityName(alreadyExistingCities),
+    id: alreadyExistingCities.length.toString(),
+    owner: undefined,
+    hexLocationId: _getCityLocationId(alreadyExistingCities, board)
+  };
+}
+
+function _getCityLocationId(
+  alreadyExistingCities: City[],
+  board: Hex[][]
+): string {
+  const cityLocationId = getRandomHexLocationId(board);
+  return alreadyExistingCities.some(
+    (city) => city.hexLocationId === cityLocationId
+  )
+    ? _getCityLocationId(alreadyExistingCities, board)
+    : cityLocationId;
+}
+
+function _getCityName(alreadyExistingCities: City[]): string {
+  const cityNameIndex = getRandomInt(CITY_NAMES.length - 1);
+  const cityName = CITY_NAMES[cityNameIndex];
+  return alreadyExistingCities.some((city) => city.name === cityName)
+    ? _getCityName(alreadyExistingCities)
+    : cityName;
+}
+
+export function getEmptyCity(cities: City[]): City {
+  const cityIndex = getRandomInt(cities.length - 1);
+  const city = cities[cityIndex];
+  return !city.owner ? city : getEmptyCity(cities);
 }

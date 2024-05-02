@@ -3,7 +3,7 @@ import { City } from '../components/City/City';
 import { Hex } from '../components/Hex/Hex';
 import { Pnj } from '../components/Pnj/Pnj';
 import { getAdjacentHexIds } from './AdjacencyUtils';
-import { getRandomHexLocationId } from './HexUtils';
+import { getEmptyCity } from './CityUtils';
 
 /**
  * Gets current active player
@@ -32,16 +32,13 @@ export function getActivePlayer(
 export function getInitialPlayer(
   playerId: number,
   playerColor: string,
-  board: Hex[][]
+  board: Hex[][],
+  cityList: City[]
 ): Player {
-  const firstCity: City = {
-    id: `cit_${playerId}`,
-    name: `City ${playerId}`,
-    owner: {
-      id: playerId,
-      color: playerColor
-    },
-    hexLocationId: getRandomHexLocationId(board)
+  const firstCity: City = getEmptyCity(cityList);
+  firstCity.owner = {
+    id: playerId,
+    color: playerColor
   };
 
   const firstPnj: Pnj = {
@@ -66,7 +63,6 @@ export function getInitialPlayer(
     playerId,
     playerColor,
     pnjList: [firstPnj],
-    cityList: [firstCity],
     visibleHexsIds
   };
 }
@@ -93,7 +89,6 @@ export function getDummyPlayer(): Player {
     playerId: -1,
     playerColor: 'no-color',
     pnjList: [],
-    cityList: [],
     visibleHexsIds: []
   };
 }

@@ -16,12 +16,12 @@ import {
 } from './utils/PlayerUtils';
 import { checkWinner } from './utils/GameUtils';
 import TurnCounter from './components/TurnCounter/TurnCounter';
+import { getInitialCity } from './utils/CityUtils';
 
 export interface Player {
   playerId: number;
   playerColor: string;
   pnjList: Pnj[];
-  cityList: City[];
   visibleHexsIds: string[];
 }
 
@@ -31,14 +31,29 @@ function App(): ReactElement {
   const [actualTurn, setActualTurn] = useState<number>(1);
   const [winner, setWinner] = useState<Player | undefined>(undefined);
   const [board, setBoard] = useState<Hex[][]>([]);
+  const [cityList, setCityList] = useState<City[]>([]);
+
+  /**
+   * Auxiliar function that initializes city list
+   */
+  function initializeCityList(): void {
+    const cities: City[] = [];
+
+    cities.push(getInitialCity(cities, board));
+    cities.push(getInitialCity(cities, board));
+    cities.push(getInitialCity(cities, board));
+    cities.push(getInitialCity(cities, board));
+
+    setCityList(cities);
+  }
 
   /**
    * Auxiliar function that initializes player list
    */
   function intializePlayerList(): void {
     const players: Player[] = [
-      getInitialPlayer(1, 'red', board),
-      getInitialPlayer(2, 'blue', board)
+      getInitialPlayer(1, 'red', board, cityList),
+      getInitialPlayer(2, 'blue', board, cityList)
     ];
 
     setPlayerList(players);
@@ -51,7 +66,7 @@ function App(): ReactElement {
    * @returns { void }
    */
   function changeTurn(): void {
-    const winPlayer = checkWinner(playerList);
+    const winPlayer = checkWinner(playerList, cityList);
     if (winPlayer) {
       setWinner(winPlayer);
       return;
@@ -113,6 +128,7 @@ function App(): ReactElement {
     ) : (
       <Board
         board={board}
+        cityList={cityList}
         playerList={playerList}
         updatePlayers={updatePlayers}
         changeTurn={changeTurn}
@@ -126,9 +142,15 @@ function App(): ReactElement {
 
   useEffect(() => {
     if (board?.length) {
-      intializePlayerList();
+      initializeCityList();
     }
   }, [board]);
+
+  useEffect(() => {
+    if (board?.length && cityList.length) {
+      intializePlayerList();
+    }
+  }, [board, cityList]);
 
   useEffect(() => {
     const playerListCopy = _.cloneDeep(playerList);

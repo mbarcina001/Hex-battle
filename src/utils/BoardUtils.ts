@@ -1,6 +1,7 @@
 import { Player } from '../App';
 import { BOARD_TYPES } from '../App.constants';
 import { SELECTED_HEX_ACTION, SelectedPnj } from '../components/Board/Board';
+import { City } from '../components/City/City';
 import { Hex } from '../components/Hex/Hex';
 import { Pnj } from '../components/Pnj/Pnj';
 import { getCityInHex } from './CityUtils';
@@ -35,7 +36,7 @@ export function getInitialBoard(): Hex[][] {
 export function getActionToTriggerInSelectedHex(
   selectedHexId: string,
   activePlayer: Player,
-  playerList: Player[],
+  cityList: City[],
   pnjInDestinationHex?: Pnj,
   selectedPnj?: SelectedPnj
 ): SELECTED_HEX_ACTION {
@@ -55,7 +56,7 @@ export function getActionToTriggerInSelectedHex(
     }
   } else if (
     !pnjInDestinationHex &&
-    getCityInHex(selectedHexId, playerList)?.owner.id === activePlayer.playerId
+    getCityInHex(selectedHexId, cityList)?.owner?.id === activePlayer.playerId
   ) {
     return SELECTED_HEX_ACTION.OPEN_SHOP;
   } else if (
