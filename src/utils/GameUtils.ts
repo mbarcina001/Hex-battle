@@ -1,5 +1,4 @@
-import { Player } from '../App';
-import { City } from '../components/City/City';
+import { Player, City } from '../App.constants';
 
 /**
  * Sets winner if any

@@ -4,9 +4,7 @@ import * as _ from 'lodash';
 import Board from './components/Board/Board';
 
 import { ActivePlayerContext } from './context/ActivePlayerContext/ActivePlayerContext';
-import { Hex } from './components/Hex/Hex';
-import { City } from './components/City/City';
-import { Pnj } from './components/Pnj/Pnj';
+import { Hex, City, Player } from './App.constants';
 
 import { getInitialBoard } from './utils/BoardUtils';
 import {
@@ -17,13 +15,6 @@ import {
 import { checkWinner } from './utils/GameUtils';
 import TurnCounter from './components/TurnCounter/TurnCounter';
 import { getInitialCity } from './utils/CityUtils';
-
-export interface Player {
-  playerId: number;
-  playerColor: string;
-  pnjList: Pnj[];
-  visibleHexsIds: string[];
-}
 
 function App(): ReactElement {
   const [activePlayerId, setActivePlayerId] = useState<number>(-1);

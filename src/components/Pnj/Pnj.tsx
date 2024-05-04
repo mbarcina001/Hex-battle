@@ -5,18 +5,7 @@ import { useActivePlayerContext } from '../../context/ActivePlayerContext/Active
 import { isAllyPnj } from '../../utils/PnjUtils';
 
 import './Pnj.scss';
-import { Owner } from '../Hex/Hex';
-
-export interface Pnj {
-  type: string;
-  id: string;
-  owner: Owner;
-  canMove: boolean;
-  hexLocationId: string;
-  attack: number;
-  defense: number;
-  healthPoints: number;
-}
+import { Pnj } from '../../App.constants';
 
 interface PnjCompProps {
   pnj: Pnj;

@@ -13,11 +13,14 @@ function TurnCounter({ turnNumber }: TurnCounterProps): ReactElement {
 
   return (
     <h4 className="counter">
-      <span>{`Turn: ${turnNumber} -`}</span>
-      <span>&nbsp;</span>
-      <span style={{ color: activePlayer.playerColor }}>
-        {`Player: ${activePlayer.playerId}`}
-      </span>
+      <p>
+        <span>{`Turn: ${turnNumber} -`}</span>
+        <span>&nbsp;</span>
+        <span style={{ color: activePlayer.playerColor }}>
+          {`Player: ${activePlayer.playerId}`}
+        </span>
+      </p>
+      <p className="gold">{`Gold: ${activePlayer.gold}`}</p>
     </h4>
   );
 }

@@ -1,6 +1,6 @@
-import { Hex } from '../components/Hex/Hex';
+import { Hex } from '../App.constants';
 
-export interface Coords {
+interface Coords {
   x: number;
   y: number;
 }
@@ -124,13 +124,53 @@ export function parseHexIdFromCoords(coords: Coords): string {
   return `${coords.x}_${coords.y}`;
 }
 
+export function getAdjacentHexIds(
+  hexId: string,
+  board: Hex[][],
+  range = 1
+): string[] {
+  let adjacentHexIds: string[] = [];
+  let hexsToCheck: string[] = [hexId];
+
+  while (range > 0) {
+    const loopResult = _getAdjacentHexIdsFromArray(hexsToCheck, board);
+    hexsToCheck = loopResult;
+    adjacentHexIds = adjacentHexIds.concat(loopResult);
+
+    range -= 1;
+  }
+
+  return adjacentHexIds;
+}
+
+/**
+ * Given a hex coords array returns adjacent hexs coords
+ * @param {string} hexId
+ * @param {Hex[][]} board
+ * @returns {string[]}
+ */
+function _getAdjacentHexIdsFromArray(
+  hexIds: string[],
+  board: Hex[][]
+): string[] {
+  let result: string[] = [];
+
+  hexIds.forEach(
+    (hexId) => (result = result.concat(_getAdjacentHexIds(hexId, board)))
+  );
+
+  // TODO: FILTER REPEATED
+
+  return result;
+}
+
 /**
  * Given a hex coords returns adjacent hexs coords
  * @param {string} hexId
  * @param {Hex[][]} board
  * @returns {string[]}
  */
-export function getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
+function _getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
   const coords = parseCoordsFromHexId(hexId);
   let adjacentCoords: Coords[] = _getHorizontalAdjacentCoords(coords).concat(
     _getVerticalAdjacentCoords(coords),

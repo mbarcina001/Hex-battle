@@ -1,7 +1,4 @@
-import { Player } from '../App';
-import { Pnj } from '../components/Pnj/Pnj';
-
-export const MAX_HEALTH_POINTS = 10;
+import { MAX_HEALTH_POINTS, Player, Pnj } from '../App.constants';
 
 /**
  * Calculates if received pnj is enemy of received active player

@@ -1,16 +1,21 @@
 import React, { ReactElement } from 'react';
 import Button from 'react-bootstrap/Button';
-import './ShopMenuButton.scss';
+import './MenuButton.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoins, faInfo } from '@fortawesome/free-solid-svg-icons';
 
-function ShopMenuButton(): ReactElement {
+interface MenuButtonProps {
+  text: string;
+  cost: number;
+}
+
+function MenuButton({ text, cost }: MenuButtonProps): ReactElement {
   return (
-    <div className="d-flex">
+    <div className="d-flex flex-wrap">
       <Button key="end-turn-button" variant="light" className="shop-button">
-        <span className="type">Soldier</span>
+        <span className="type">{text}</span>
         <span className="price">
-          2 <FontAwesomeIcon icon={faCoins} />
+          {cost} <FontAwesomeIcon icon={faCoins} />
         </span>
       </Button>
       <span className="info">
@@ -20,4 +25,4 @@ function ShopMenuButton(): ReactElement {
   );
 }
 
-export default ShopMenuButton;
+export default MenuButton;

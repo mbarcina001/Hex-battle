@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { Player } from '../../App';
+import { Player } from '../../App.constants';
 
 export const ActivePlayerContext = React.createContext<Player | undefined>(
   undefined

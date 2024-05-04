@@ -1,12 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Owner } from '../Hex/Hex';
-
-export interface City {
-  name: string;
-  id: string;
-  owner?: Owner;
-  hexLocationId: string;
-}
+import { City } from '../../App.constants';
 
 interface CityCompProps {
   city: City;

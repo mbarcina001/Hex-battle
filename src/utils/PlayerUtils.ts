@@ -1,7 +1,4 @@
-import { Player } from '../App';
-import { City } from '../components/City/City';
-import { Hex } from '../components/Hex/Hex';
-import { Pnj } from '../components/Pnj/Pnj';
+import { STARTING_GOLD, Player, City, Hex, Pnj } from '../App.constants';
 import { getAdjacentHexIds } from './AdjacencyUtils';
 import { getEmptyCity } from './CityUtils';
 
@@ -63,7 +60,8 @@ export function getInitialPlayer(
     playerId,
     playerColor,
     pnjList: [firstPnj],
-    visibleHexsIds
+    visibleHexsIds,
+    gold: STARTING_GOLD
   };
 }
 
@@ -89,6 +87,7 @@ export function getDummyPlayer(): Player {
     playerId: -1,
     playerColor: 'no-color',
     pnjList: [],
-    visibleHexsIds: []
+    visibleHexsIds: [],
+    gold: 0
   };
 }

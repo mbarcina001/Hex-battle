@@ -1,14 +1,19 @@
 import React, { ReactElement } from 'react';
-import ShopMenuButton from './ShopMenuButton/ShopMenuButton';
+import MenuButton from '../MenuButton/MenuButton';
+import { PNJ_TYPES } from '../../App.constants';
 
 function ShopMenu(): ReactElement {
   return (
     <>
       <h4>Shop</h4>
       <div className="menu">
-        <ShopMenuButton />
-        <ShopMenuButton />
-        <ShopMenuButton />
+        {PNJ_TYPES?.map((pnj) => (
+          <MenuButton
+            key={pnj.type.toString()}
+            text={pnj.type.toString()}
+            cost={pnj.goldCost}
+          />
+        ))}
       </div>
     </>
   );

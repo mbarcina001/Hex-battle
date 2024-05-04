@@ -1,7 +1,5 @@
-import { Player } from '../App';
-import { CITY_NAMES } from '../App.constants';
-import { City } from '../components/City/City';
-import { Hex } from '../components/Hex/Hex';
+import { CITY_NAMES, Player, City, Hex } from '../App.constants';
+import { getAdjacentHexIds } from './AdjacencyUtils';
 import { getRandomHexLocationId } from './HexUtils';
 import { getRandomInt } from './Utils';
 
@@ -72,8 +70,10 @@ function _getCityLocationId(
   board: Hex[][]
 ): string {
   const cityLocationId = getRandomHexLocationId(board);
-  return alreadyExistingCities.some(
-    (city) => city.hexLocationId === cityLocationId
+  return _checkLocationOrSurroundingsOccupied(
+    cityLocationId,
+    alreadyExistingCities,
+    board
   )
     ? _getCityLocationId(alreadyExistingCities, board)
     : cityLocationId;
@@ -91,4 +91,28 @@ export function getEmptyCity(cities: City[]): City {
   const cityIndex = getRandomInt(cities.length - 1);
   const city = cities[cityIndex];
   return !city.owner ? city : getEmptyCity(cities);
+}
+
+/**
+ * Checks if received location or its surroundings have a city
+ * @returns {boolean}
+ */
+export function _checkLocationOrSurroundingsOccupied(
+  cityLocationId: string,
+  alreadyExistingCities: City[],
+  board: Hex[][]
+): boolean {
+  const locationOccupied = alreadyExistingCities.some(
+    (city) => city.hexLocationId === cityLocationId
+  );
+
+  if (locationOccupied) {
+    return true;
+  }
+
+  const surroundingHexIds = getAdjacentHexIds(cityLocationId, board, 2);
+
+  return alreadyExistingCities.some((city) =>
+    surroundingHexIds.includes(city.hexLocationId)
+  );
 }

@@ -7,7 +7,7 @@ export enum ACTION_ENUM {
   END_TURN = 'END_TURN'
 }
 
-export interface ActionMenuProps {
+interface ActionMenuProps {
   actionList: ACTION_ENUM[];
   triggerAction: (action: ACTION_ENUM) => void;
 }

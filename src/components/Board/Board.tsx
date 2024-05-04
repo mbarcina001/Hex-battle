@@ -1,8 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import './Board.scss';
 
-import HexComp, { Hex } from '../Hex/Hex';
-import { Pnj } from '../Pnj/Pnj';
+import HexComp from '../Hex/Hex';
 
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
@@ -16,14 +15,14 @@ import {
   healSelf
 } from '../../utils/PnjUtils';
 
-import { Player } from '../../App';
+import { Player, City, Hex, Pnj, SelectedPnj } from '../../App.constants';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
 import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
 import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
 import ShopMenu from '../ShopMenu/ShopMenu';
-import { City } from '../City/City';
+import BuildMenu from '../BuildMenu/BuildMenu';
 
 interface BoardProps {
   board: Hex[][];
@@ -31,16 +30,6 @@ interface BoardProps {
   playerList: Player[];
   updatePlayers: (playerList: Player[]) => void;
   changeTurn: () => void;
-}
-
-export interface SelectedPnj {
-  whichPnj: Pnj;
-  destinationHexs: string[];
-}
-
-export interface VisibleHexsByPlayer {
-  playerId: number;
-  visibleHexsIds: string[];
 }
 
 export enum SELECTED_HEX_ACTION {
@@ -322,6 +311,7 @@ function Board({
       <div className="right-menu">
         <ActionMenu actionList={actionList} triggerAction={triggerAction} />
         {showShop ? <ShopMenu /> : ''}
+        <BuildMenu />
       </div>
     </>
   );

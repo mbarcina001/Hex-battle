@@ -1,19 +1,10 @@
 import React, { ReactElement } from 'react';
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 import { isAllyPnj } from '../../utils/PnjUtils';
-import CityComp, { City } from '../City/City';
-import PnjComp, { Pnj } from '../Pnj/Pnj';
+import CityComp from '../City/City';
+import PnjComp from '../Pnj/Pnj';
+import { City, Pnj, Hex } from '../../App.constants';
 import './Hex.scss';
-
-export interface Hex {
-  id: string;
-  type: string;
-}
-
-export interface Owner {
-  id: number;
-  color: string;
-}
 
 interface HexProps {
   hex: Hex;

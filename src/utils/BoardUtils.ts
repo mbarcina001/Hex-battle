@@ -1,9 +1,12 @@
-import { Player } from '../App';
-import { BOARD_TYPES } from '../App.constants';
-import { SELECTED_HEX_ACTION, SelectedPnj } from '../components/Board/Board';
-import { City } from '../components/City/City';
-import { Hex } from '../components/Hex/Hex';
-import { Pnj } from '../components/Pnj/Pnj';
+import {
+  BOARD_TYPES,
+  Player,
+  City,
+  Hex,
+  Pnj,
+  SelectedPnj
+} from '../App.constants';
+import { SELECTED_HEX_ACTION } from '../components/Board/Board';
 import { getCityInHex } from './CityUtils';
 import { isAllyPnj, isEnemyPnj } from './PnjUtils';
 

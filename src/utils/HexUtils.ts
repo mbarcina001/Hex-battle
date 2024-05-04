@@ -1,5 +1,5 @@
 import { getRandomInt } from './Utils';
-import { Hex } from '../components/Hex/Hex';
+import { Hex } from '../App.constants';
 
 /**
  * Gets random hexLocationId from board
