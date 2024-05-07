@@ -93,7 +93,7 @@ function App(): ReactElement {
   }
 
   /**
-   * Updates received player in player list
+   * Updates received players in main player list
    * @param {Player[]} playerListToUpdate
    * @param {Player} playerToUpdate
    */
@@ -111,6 +111,35 @@ function App(): ReactElement {
   }
 
   /**
+   * Updates every received city
+   * @param {City[]} cityToUpdateArr
+   */
+  function updateCities(cityToUpdateArr: City[]): void {
+    const cityListCopy = _.cloneDeep(cityList);
+
+    cityToUpdateArr.forEach((cityToUpdate: City) => {
+      updateCity(cityListCopy, cityToUpdate);
+    });
+
+    setCityList(cityListCopy);
+  }
+
+  /**
+   * Updates received cities in main city list
+   * @param {City[]} cityListToUpdate
+   * @param {City} cityToUpdate
+   */
+  function updateCity(cityListToUpdate: City[], cityToUpdate: City): void {
+    const cityToUpdateIdx = cityListToUpdate.findIndex(
+      (city) => city.id === cityToUpdate.id
+    );
+
+    if (cityToUpdateIdx >= 0) {
+      cityListToUpdate[cityToUpdateIdx] = cityToUpdate;
+    }
+  }
+
+  /**
    * Shows winner if any; else shows board
    * @returns {ReactElement}
    */
@@ -123,26 +152,29 @@ function App(): ReactElement {
         cityList={cityList}
         playerList={playerList}
         updatePlayers={updatePlayers}
+        updateCities={updateCities}
         changeTurn={changeTurn}
       />
     );
   }
 
   useEffect(() => {
-    setBoard(getInitialBoard);
-  }, []);
-
-  useEffect(() => {
-    if (board?.length) {
-      initializeCityList();
+    if (!board.length) {
+      setBoard(getInitialBoard);
     }
   }, [board]);
 
   useEffect(() => {
-    if (board?.length && cityList.length) {
-      intializePlayerList();
+    if (board.length && !cityList.length) {
+      initializeCityList();
     }
   }, [board, cityList]);
+
+  useEffect(() => {
+    if (board.length && cityList.length && !playerList.length) {
+      intializePlayerList();
+    }
+  }, [board, cityList, playerList]);
 
   useEffect(() => {
     const playerListCopy = _.cloneDeep(playerList);
@@ -167,7 +199,7 @@ function App(): ReactElement {
       );
       setPlayerList(playerListCopy);
     }
-  }, [activePlayerId, cityList]);
+  }, [activePlayerId]);
 
   return (
     <ActivePlayerContext.Provider

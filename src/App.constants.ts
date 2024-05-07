@@ -68,8 +68,13 @@ export enum BUILDING_TYPE {
   GOLD_MINE = 'Gold mine'
 }
 
+export interface Building {
+  hexLocationId: string;
+  type: BuildingType;
+}
+
 export interface BuildingType {
-  type: BUILDING_TYPE;
+  typeName: BUILDING_TYPE;
   goldCost: number;
   goldEarnings: number;
   allowedHexTypes: HEX_TYPE[];
@@ -81,7 +86,7 @@ export interface City {
   isCapitalCity: boolean;
   owner?: Owner;
   hexLocationId: string;
-  buildings: BuildingType[];
+  buildings: Building[];
 }
 
 export interface Player {
@@ -210,31 +215,31 @@ export const PNJ_TYPES: PnjType[] = [
 
 export const BUILDING_TYPES: BuildingType[] = [
   {
-    type: BUILDING_TYPE.WELL,
+    typeName: BUILDING_TYPE.WELL,
     goldCost: 3,
     goldEarnings: 1,
     allowedHexTypes: [HEX_TYPE.DESERT]
   },
   {
-    type: BUILDING_TYPE.WINDMILL,
+    typeName: BUILDING_TYPE.WINDMILL,
     goldCost: 3,
     goldEarnings: 1,
     allowedHexTypes: [HEX_TYPE.GRASS]
   },
   {
-    type: BUILDING_TYPE.MARKET,
+    typeName: BUILDING_TYPE.MARKET,
     goldCost: 4,
     goldEarnings: 2,
     allowedHexTypes: [HEX_TYPE.GRASS, HEX_TYPE.DESERT]
   },
   {
-    type: BUILDING_TYPE.WOOD_CHOP,
+    typeName: BUILDING_TYPE.WOOD_CHOP,
     goldCost: 7,
     goldEarnings: 3,
     allowedHexTypes: [HEX_TYPE.GRASS]
   },
   {
-    type: BUILDING_TYPE.GOLD_MINE,
+    typeName: BUILDING_TYPE.GOLD_MINE,
     goldCost: 7,
     goldEarnings: 3,
     allowedHexTypes: [HEX_TYPE.DESERT]

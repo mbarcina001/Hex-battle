@@ -21,11 +21,19 @@ import {
   Hex,
   Pnj,
   SelectedPnj,
-  SELECTED_HEX_ACTION
+  SELECTED_HEX_ACTION,
+  BuildingType,
+  PnjType
 } from '../../App.constants';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
-import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
+import {
+  captureCity,
+  getAdjacentCityIfAny,
+  getCityInHex,
+  getBuildingInHex,
+  isEnemyCity
+} from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
 import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
 import PnjMenu from '../PnjMenu/PnjMenu';
@@ -36,6 +44,7 @@ interface BoardProps {
   cityList: City[];
   playerList: Player[];
   updatePlayers: (playerList: Player[]) => void;
+  updateCities: (cityList: City[]) => void;
   changeTurn: () => void;
 }
 
@@ -44,6 +53,7 @@ function Board({
   cityList,
   playerList,
   updatePlayers,
+  updateCities,
   changeTurn
 }: BoardProps): ReactElement {
   const [selectedHex, setSelectedHex] = useState<string>('');
@@ -262,6 +272,39 @@ function Board({
     setSelectedHex('');
   }
 
+  function purchaseBuilding(buildingType: BuildingType): void {
+    const cityToUpgrade = getAdjacentCityIfAny(selectedHex, board, cityList);
+
+    if (cityToUpgrade) {
+      cityToUpgrade.buildings.push({
+        hexLocationId: selectedHex,
+        type: buildingType
+      });
+      updateCities([cityToUpgrade]);
+
+      activePlayer.gold -= buildingType.goldCost;
+      updatePlayers([activePlayer]);
+    }
+  }
+
+  function purchasePnj(pnj: PnjType): void {
+    activePlayer.gold -= pnj.goldCost;
+    activePlayer.pnjList.push({
+      type: pnj.type,
+      id: `pnj_999`, // TODO: GIVE UNIQUE ID
+      owner: {
+        id: activePlayer.playerId,
+        color: activePlayer.playerColor
+      },
+      hexLocationId: selectedHex,
+      canMove: false,
+      attack: pnj.attack,
+      defense: pnj.defense,
+      healthPoints: pnj.maxHealthPoints
+    });
+    updatePlayers([activePlayer]);
+  }
+
   useEffect(() => {
     setActionList([]);
     setSelectedHex('');
@@ -304,6 +347,7 @@ function Board({
                 }
                 pnjInHex={getPnjInHex(boardHex.id, playerList)}
                 cityInHex={getCityInHex(boardHex.id, cityList)}
+                buildingInHex={getBuildingInHex(boardHex.id, cityList)}
                 setAsSelected={setSelectedHex}
               />
             </div>
@@ -313,8 +357,8 @@ function Board({
 
       <div className="right-menu">
         <ActionMenu actionList={actionList} triggerAction={triggerAction} />
-        {showPnjMenu ? <PnjMenu /> : ''}
-        {showBuildMenu ? <BuildMenu /> : ''}
+        {showPnjMenu ? <PnjMenu purchasePnj={purchasePnj} /> : ''}
+        {showBuildMenu ? <BuildMenu purchaseBuilding={purchaseBuilding} /> : ''}
       </div>
     </>
   );

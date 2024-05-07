@@ -1,13 +1,21 @@
 import React, { ReactElement } from 'react';
 import MenuButton from '../MenuButton/MenuButton';
-import { PNJ_TYPES } from '../../App.constants';
+import { PNJ_TYPES, PnjType } from '../../App.constants';
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
-function PnjMenu(): ReactElement {
+interface PnjMenuProps {
+  purchasePnj: (pnj: PnjType) => void;
+}
+
+function PnjMenu({ purchasePnj }: PnjMenuProps): ReactElement {
   const activePlayer = useActivePlayerContext();
 
   function canPlayerAffordPnj(goldCost: number): boolean {
     return activePlayer.gold >= goldCost;
+  }
+
+  function onPurchaseItem(pnj: PnjType): void {
+    purchasePnj(pnj);
   }
 
   return (
@@ -20,6 +28,7 @@ function PnjMenu(): ReactElement {
             text={pnj.type.toString()}
             cost={pnj.goldCost}
             disabled={!canPlayerAffordPnj(pnj.goldCost)}
+            onPurchaseItem={() => onPurchaseItem(pnj)}
           />
         ))}
       </div>

@@ -1,4 +1,4 @@
-import { CITY_NAMES, Player, City, Hex } from '../App.constants';
+import { CITY_NAMES, Player, City, Hex, Building } from '../App.constants';
 import { getAdjacentHexIds } from './AdjacencyUtils';
 import { getRandomHexLocationId } from './HexUtils';
 import { getRandomInt } from './Utils';
@@ -34,6 +34,26 @@ export function getCityInHex(
   cityList: City[]
 ): City | undefined {
   return cityList.find((city) => city.hexLocationId === hexId);
+}
+
+/**
+ * Gets hex's occupant building if any
+ * @param {string} hexId
+ * @param {Player[]} playerList
+ * @returns {Building | undefined}
+ */
+export function getBuildingInHex(
+  hexId: string,
+  cityList: City[]
+): Building | undefined {
+  for (const city of cityList) {
+    const foundBuilding = city.buildings.find(
+      (building) => building.hexLocationId === hexId
+    );
+    if (foundBuilding) {
+      return foundBuilding;
+    }
+  }
 }
 
 /**
@@ -123,7 +143,7 @@ export function calculateCityEarningsOnTurnStart(city: City): number {
   let gold = city.isCapitalCity ? 2 : 1;
 
   city.buildings.forEach((building) => {
-    gold += building.goldEarnings;
+    gold += building.type.goldEarnings;
   });
 
   return gold;
@@ -136,12 +156,12 @@ export function getAdjacentCityIfAny(
 ): City | undefined {
   const adjacentHexs = getAdjacentHexIds(hexId, board);
 
-  adjacentHexs.forEach((hex) => {
+  for (const hex of adjacentHexs) {
     const cityInHex = getCityInHex(hex, cityList);
     if (cityInHex) {
       return cityInHex;
     }
-  });
+  }
 
   return undefined;
 }

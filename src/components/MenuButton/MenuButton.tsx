@@ -8,9 +8,15 @@ interface MenuButtonProps {
   text: string;
   cost: number;
   disabled: boolean;
+  onPurchaseItem: () => void;
 }
 
-function MenuButton({ text, cost, disabled }: MenuButtonProps): ReactElement {
+function MenuButton({
+  text,
+  cost,
+  disabled,
+  onPurchaseItem
+}: MenuButtonProps): ReactElement {
   return (
     <div className="d-flex">
       <Button
@@ -18,6 +24,7 @@ function MenuButton({ text, cost, disabled }: MenuButtonProps): ReactElement {
         variant="light"
         className="shop-button"
         disabled={disabled}
+        onClick={() => onPurchaseItem()}
       >
         <span className="d-flex justify-content-between">
           <span className="type">{text}</span>

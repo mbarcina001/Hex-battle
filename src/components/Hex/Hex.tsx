@@ -3,7 +3,8 @@ import { useActivePlayerContext } from '../../context/ActivePlayerContext/Active
 import { isAllyPnj } from '../../utils/PnjUtils';
 import CityComp from '../City/City';
 import PnjComp from '../Pnj/Pnj';
-import { City, Pnj, Hex } from '../../App.constants';
+import BuildingComp from '../Building/Building';
+import { City, Pnj, Hex, Building } from '../../App.constants';
 import './Hex.scss';
 
 interface HexProps {
@@ -12,6 +13,7 @@ interface HexProps {
   isDestinationHex: boolean;
   pnjInHex?: Pnj;
   cityInHex?: City;
+  buildingInHex?: Building;
   // eslint-disable-next-line no-unused-vars
   setAsSelected: (hexId: string) => void;
 }
@@ -22,6 +24,7 @@ function HexComp({
   isDestinationHex,
   pnjInHex,
   cityInHex,
+  buildingInHex,
   setAsSelected
 }: HexProps): ReactElement {
   const activePlayer = useActivePlayerContext();
@@ -75,6 +78,11 @@ function HexComp({
       <div className="hex-content">
         {pnjInHex && isHexVisible() ? <PnjComp pnj={pnjInHex} /> : ''}
         {cityInHex && isHexVisible() ? <CityComp city={cityInHex} /> : ''}
+        {buildingInHex && isHexVisible() ? (
+          <BuildingComp building={buildingInHex} />
+        ) : (
+          ''
+        )}
       </div>
     </div>
   );
