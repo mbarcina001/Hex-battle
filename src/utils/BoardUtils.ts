@@ -7,9 +7,8 @@ import {
   SelectedPnj,
   SELECTED_HEX_ACTION
 } from '../App.constants';
-import { getCityInHex, isAllyCity } from './CityUtils';
+import { getCityInHex, isAllyCity, getAdjacentCityIfAny } from './CityUtils';
 import { isAllyPnj, isEnemyPnj } from './PnjUtils';
-import { getAdjacentHexIds } from './AdjacencyUtils';
 
 /**
  * Gets initial game board
@@ -166,9 +165,6 @@ function _hexHasAdjacentAllyCity(
   activePlayer: Player,
   board: Hex[][]
 ): boolean {
-  const adjacentHexs = getAdjacentHexIds(selectedHexId, board);
-  return adjacentHexs.some((hex) => {
-    const cityInHex = getCityInHex(hex, cityList);
-    return !!cityInHex && isAllyCity(cityInHex, activePlayer);
-  });
+  const adjacentCity = getAdjacentCityIfAny(selectedHexId, board, cityList);
+  return !!adjacentCity && isAllyCity(adjacentCity, activePlayer);
 }

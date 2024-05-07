@@ -28,7 +28,7 @@ import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
 import { findPlayerById } from '../../utils/PlayerUtils';
 import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
-import ShopMenu from '../ShopMenu/ShopMenu';
+import PnjMenu from '../PnjMenu/PnjMenu';
 import BuildMenu from '../BuildMenu/BuildMenu';
 
 interface BoardProps {
@@ -51,7 +51,7 @@ function Board({
     undefined
   );
   const [actionList, setActionList] = useState<ACTION_ENUM[]>([]);
-  const [showShop, setShowShop] = useState<boolean>(false);
+  const [showPnjMenu, setShowPnjMenu] = useState<boolean>(false);
   const [showBuildMenu, setShowBuildMenu] = useState<boolean>(false);
 
   const activePlayer = useActivePlayerContext();
@@ -188,7 +188,7 @@ function Board({
       pnjInDestinationHex,
       selectedPnj
     );
-    setShowShop(false);
+    setShowPnjMenu(false);
     setShowBuildMenu(false);
 
     switch (actionToTrigger) {
@@ -214,7 +214,7 @@ function Board({
         setSelectedPnj(undefined);
         break;
       case SELECTED_HEX_ACTION.OPEN_SHOP:
-        setShowShop(true);
+        setShowPnjMenu(true);
         break;
       case SELECTED_HEX_ACTION.OPEN_BUILD_MENU:
         setShowBuildMenu(true);
@@ -313,7 +313,7 @@ function Board({
 
       <div className="right-menu">
         <ActionMenu actionList={actionList} triggerAction={triggerAction} />
-        {showShop ? <ShopMenu /> : ''}
+        {showPnjMenu ? <PnjMenu /> : ''}
         {showBuildMenu ? <BuildMenu /> : ''}
       </div>
     </>

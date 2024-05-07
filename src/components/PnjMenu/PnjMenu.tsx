@@ -1,8 +1,15 @@
 import React, { ReactElement } from 'react';
 import MenuButton from '../MenuButton/MenuButton';
 import { PNJ_TYPES } from '../../App.constants';
+import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
-function ShopMenu(): ReactElement {
+function PnjMenu(): ReactElement {
+  const activePlayer = useActivePlayerContext();
+
+  function canPlayerAffordPnj(goldCost: number): boolean {
+    return activePlayer.gold >= goldCost;
+  }
+
   return (
     <>
       <h4>Shop</h4>
@@ -12,6 +19,7 @@ function ShopMenu(): ReactElement {
             key={pnj.type.toString()}
             text={pnj.type.toString()}
             cost={pnj.goldCost}
+            disabled={!canPlayerAffordPnj(pnj.goldCost)}
           />
         ))}
       </div>
@@ -19,4 +27,4 @@ function ShopMenu(): ReactElement {
   );
 }
 
-export default ShopMenu;
+export default PnjMenu;

@@ -7,15 +7,23 @@ import { faCoins, faInfo } from '@fortawesome/free-solid-svg-icons';
 interface MenuButtonProps {
   text: string;
   cost: number;
+  disabled: boolean;
 }
 
-function MenuButton({ text, cost }: MenuButtonProps): ReactElement {
+function MenuButton({ text, cost, disabled }: MenuButtonProps): ReactElement {
   return (
-    <div className="d-flex flex-wrap">
-      <Button key="end-turn-button" variant="light" className="shop-button">
-        <span className="type">{text}</span>
-        <span className="price">
-          {cost} <FontAwesomeIcon icon={faCoins} />
+    <div className="d-flex">
+      <Button
+        key="end-turn-button"
+        variant="light"
+        className="shop-button"
+        disabled={disabled}
+      >
+        <span className="d-flex justify-content-between">
+          <span className="type">{text}</span>
+          <span className="price">
+            {cost} <FontAwesomeIcon icon={faCoins} />
+          </span>
         </span>
       </Button>
       <span className="info">

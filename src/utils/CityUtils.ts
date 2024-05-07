@@ -128,3 +128,20 @@ export function calculateCityEarningsOnTurnStart(city: City): number {
 
   return gold;
 }
+
+export function getAdjacentCityIfAny(
+  hexId: string,
+  board: Hex[][],
+  cityList: City[]
+): City | undefined {
+  const adjacentHexs = getAdjacentHexIds(hexId, board);
+
+  adjacentHexs.forEach((hex) => {
+    const cityInHex = getCityInHex(hex, cityList);
+    if (cityInHex) {
+      return cityInHex;
+    }
+  });
+
+  return undefined;
+}

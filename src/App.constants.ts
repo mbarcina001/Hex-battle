@@ -152,17 +152,6 @@ export const CITY_NAMES: string[] = [
 
 export const PNJ_TYPES: PnjType[] = [
   {
-    type: PNJ_TYPE.SOLDIER,
-    goldCost: 3,
-    maxHealthPoints: 0,
-    attack: 0,
-    defense: 0,
-    movementRange: 1,
-    visionRange: 1,
-    attackRange: 1,
-    abilities: [PNJ_ABILITY.MOVE_AFTER_KILL]
-  },
-  {
     type: PNJ_TYPE.EXPLORER,
     goldCost: 2,
     maxHealthPoints: 0,
@@ -170,6 +159,17 @@ export const PNJ_TYPES: PnjType[] = [
     defense: 0,
     movementRange: 2,
     visionRange: 2,
+    attackRange: 1,
+    abilities: [PNJ_ABILITY.MOVE_AFTER_KILL]
+  },
+  {
+    type: PNJ_TYPE.SOLDIER,
+    goldCost: 3,
+    maxHealthPoints: 0,
+    attack: 0,
+    defense: 0,
+    movementRange: 1,
+    visionRange: 1,
     attackRange: 1,
     abilities: [PNJ_ABILITY.MOVE_AFTER_KILL]
   },
@@ -210,18 +210,6 @@ export const PNJ_TYPES: PnjType[] = [
 
 export const BUILDING_TYPES: BuildingType[] = [
   {
-    type: BUILDING_TYPE.GOLD_MINE,
-    goldCost: 7,
-    goldEarnings: 3,
-    allowedHexTypes: [HEX_TYPE.DESERT]
-  },
-  {
-    type: BUILDING_TYPE.MARKET,
-    goldCost: 4,
-    goldEarnings: 2,
-    allowedHexTypes: [HEX_TYPE.GRASS, HEX_TYPE.DESERT]
-  },
-  {
     type: BUILDING_TYPE.WELL,
     goldCost: 3,
     goldEarnings: 1,
@@ -234,10 +222,22 @@ export const BUILDING_TYPES: BuildingType[] = [
     allowedHexTypes: [HEX_TYPE.GRASS]
   },
   {
+    type: BUILDING_TYPE.MARKET,
+    goldCost: 4,
+    goldEarnings: 2,
+    allowedHexTypes: [HEX_TYPE.GRASS, HEX_TYPE.DESERT]
+  },
+  {
     type: BUILDING_TYPE.WOOD_CHOP,
     goldCost: 7,
     goldEarnings: 3,
     allowedHexTypes: [HEX_TYPE.GRASS]
+  },
+  {
+    type: BUILDING_TYPE.GOLD_MINE,
+    goldCost: 7,
+    goldEarnings: 3,
+    allowedHexTypes: [HEX_TYPE.DESERT]
   }
 ];
 
