@@ -48,12 +48,16 @@ export function getActionToTriggerInSelectedHex(
   if (_canSelectedPnjMoveToSelectedHex(selectedHexId, selectedPnj)) {
     if (_canHealPnjInHex(activePlayer, pnjInDestinationHex)) {
       return SELECTED_HEX_ACTION.HEAL_ALLY;
-    } else if (_canAttackPnjInHex(activePlayer, pnjInDestinationHex)) {
-      return SELECTED_HEX_ACTION.ATTACK_ENEMY;
-    } else {
-      return SELECTED_HEX_ACTION.MOVE_PNJ;
     }
-  } else if (
+
+    if (_canAttackPnjInHex(activePlayer, pnjInDestinationHex)) {
+      return SELECTED_HEX_ACTION.ATTACK_ENEMY;
+    }
+
+    return SELECTED_HEX_ACTION.MOVE_PNJ;
+  }
+
+  if (
     _destinationHexContainsUnoccupaidCity(
       selectedHexId,
       cityList,
@@ -62,7 +66,9 @@ export function getActionToTriggerInSelectedHex(
     )
   ) {
     return SELECTED_HEX_ACTION.OPEN_SHOP;
-  } else if (
+  }
+
+  if (
     _destinationHexCanOwnBuilding(
       selectedHexId,
       cityList,
@@ -72,16 +78,18 @@ export function getActionToTriggerInSelectedHex(
     )
   ) {
     return SELECTED_HEX_ACTION.OPEN_BUILD_MENU;
-  } else if (
+  }
+
+  if (
     _destinationHexContainsAllyPnjWhichCanMove(
       activePlayer,
       pnjInDestinationHex
     )
   ) {
     return SELECTED_HEX_ACTION.SELECT_PNJ;
-  } else {
-    return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
   }
+
+  return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
 }
 
 function _canSelectedPnjMoveToSelectedHex(
