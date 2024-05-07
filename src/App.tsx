@@ -8,6 +8,7 @@ import { Hex, City, Player } from './App.constants';
 
 import { getInitialBoard } from './utils/BoardUtils';
 import {
+  calculatePlayerGoldOnTurnStart,
   getActivePlayer,
   getDummyPlayer,
   getInitialPlayer
@@ -160,9 +161,13 @@ function App(): ReactElement {
         })
       );
       playerListCopy[activePlayerIdx].pnjList = updatedPnjList;
+      playerListCopy[activePlayerIdx].gold += calculatePlayerGoldOnTurnStart(
+        playerListCopy[activePlayerIdx],
+        cityList
+      );
       setPlayerList(playerListCopy);
     }
-  }, [activePlayerId]);
+  }, [activePlayerId, cityList]);
 
   return (
     <ActivePlayerContext.Provider

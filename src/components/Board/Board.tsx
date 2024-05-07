@@ -216,7 +216,7 @@ function Board({
       case SELECTED_HEX_ACTION.OPEN_SHOP:
         setShowShop(true);
         break;
-      case SELECTED_HEX_ACTION.OPEN_SHOP:
+      case SELECTED_HEX_ACTION.OPEN_BUILD_MENU:
         setShowBuildMenu(true);
         break;
       default:

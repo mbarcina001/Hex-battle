@@ -1,6 +1,10 @@
-import { STARTING_GOLD, Player, City, Hex, Pnj } from '../App.constants';
+import { Player, City, Hex, Pnj } from '../App.constants';
 import { getAdjacentHexIds } from './AdjacencyUtils';
-import { getEmptyCity } from './CityUtils';
+import {
+  calculateCityEarningsOnTurnStart,
+  getEmptyCity,
+  isAllyCity
+} from './CityUtils';
 
 /**
  * Gets current active player
@@ -37,6 +41,7 @@ export function getInitialPlayer(
     id: playerId,
     color: playerColor
   };
+  firstCity.isCapitalCity = true;
 
   const firstPnj: Pnj = {
     type: 'any',
@@ -61,7 +66,7 @@ export function getInitialPlayer(
     playerColor,
     pnjList: [firstPnj],
     visibleHexsIds,
-    gold: STARTING_GOLD
+    gold: 0
   };
 }
 
@@ -90,4 +95,19 @@ export function getDummyPlayer(): Player {
     visibleHexsIds: [],
     gold: 0
   };
+}
+
+export function calculatePlayerGoldOnTurnStart(
+  player: Player,
+  cityList: City[]
+): number {
+  let gold = 0;
+
+  cityList.forEach((city) => {
+    if (isAllyCity(city, player)) {
+      gold += calculateCityEarningsOnTurnStart(city);
+    }
+  });
+
+  return gold;
 }

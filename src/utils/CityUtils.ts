@@ -61,7 +61,9 @@ export function getInitialCity(
     name: _getCityName(alreadyExistingCities),
     id: alreadyExistingCities.length.toString(),
     owner: undefined,
-    hexLocationId: _getCityLocationId(alreadyExistingCities, board)
+    isCapitalCity: false,
+    hexLocationId: _getCityLocationId(alreadyExistingCities, board),
+    buildings: []
   };
 }
 
@@ -115,4 +117,14 @@ export function _checkLocationOrSurroundingsOccupied(
   return alreadyExistingCities.some((city) =>
     surroundingHexIds.includes(city.hexLocationId)
   );
+}
+
+export function calculateCityEarningsOnTurnStart(city: City): number {
+  let gold = city.isCapitalCity ? 2 : 1;
+
+  city.buildings.forEach((building) => {
+    gold += building.goldEarnings;
+  });
+
+  return gold;
 }

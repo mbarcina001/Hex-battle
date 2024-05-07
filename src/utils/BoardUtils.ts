@@ -58,6 +58,15 @@ export function getActionToTriggerInSelectedHex(
   }
 
   if (
+    _destinationHexContainsAllyPnjWhichCanMove(
+      activePlayer,
+      pnjInDestinationHex
+    )
+  ) {
+    return SELECTED_HEX_ACTION.SELECT_PNJ;
+  }
+
+  if (
     _destinationHexContainsUnoccupiedCity(
       selectedHexId,
       cityList,
@@ -78,15 +87,6 @@ export function getActionToTriggerInSelectedHex(
     )
   ) {
     return SELECTED_HEX_ACTION.OPEN_BUILD_MENU;
-  }
-
-  if (
-    _destinationHexContainsAllyPnjWhichCanMove(
-      activePlayer,
-      pnjInDestinationHex
-    )
-  ) {
-    return SELECTED_HEX_ACTION.SELECT_PNJ;
   }
 
   return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
@@ -157,7 +157,7 @@ function _checkIfHexContainsEnemyPnj(
   activePlayer: Player,
   pnjInDestinationHex?: Pnj
 ): boolean {
-  return !pnjInDestinationHex || isAllyPnj(pnjInDestinationHex, activePlayer);
+  return !!pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer);
 }
 
 function _hexHasAdjacentAllyCity(

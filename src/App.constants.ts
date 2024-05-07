@@ -1,5 +1,4 @@
 export const MAX_HEALTH_POINTS = 10;
-export const STARTING_GOLD = 2;
 
 export enum HEX_TYPE {
   GRASS = 'GRASS',
@@ -79,8 +78,10 @@ export interface BuildingType {
 export interface City {
   name: string;
   id: string;
+  isCapitalCity: boolean;
   owner?: Owner;
   hexLocationId: string;
+  buildings: BuildingType[];
 }
 
 export interface Player {
