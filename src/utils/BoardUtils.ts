@@ -58,7 +58,7 @@ export function getActionToTriggerInSelectedHex(
   }
 
   if (
-    _destinationHexContainsUnoccupaidCity(
+    _destinationHexContainsUnoccupiedCity(
       selectedHexId,
       cityList,
       activePlayer,
@@ -117,7 +117,7 @@ function _canAttackPnjInHex(
   return !!pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer);
 }
 
-function _destinationHexContainsUnoccupaidCity(
+function _destinationHexContainsUnoccupiedCity(
   selectedHexId: string,
   cityList: City[],
   activePlayer: Player,
