@@ -15,7 +15,14 @@ import {
   healSelf
 } from '../../utils/PnjUtils';
 
-import { Player, City, Hex, Pnj, SelectedPnj } from '../../App.constants';
+import {
+  Player,
+  City,
+  Hex,
+  Pnj,
+  SelectedPnj,
+  SELECTED_HEX_ACTION
+} from '../../App.constants';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
 import { captureCity, getCityInHex, isEnemyCity } from '../../utils/CityUtils';
@@ -32,16 +39,6 @@ interface BoardProps {
   changeTurn: () => void;
 }
 
-export enum SELECTED_HEX_ACTION {
-  HEAL_ALLY = 'HEAL_ALLY',
-  ATTACK_ENEMY = 'ATTACK_ENEMY',
-  MOVE_PNJ = 'MOVE_PNJ',
-  SELECT_PNJ = 'SELECT_PNJ',
-  CLEAR_SELECTED_PNJ = 'CLEAR_SELECTED_PNJ',
-  NO_ACTION = 'NO_ACTION',
-  OPEN_SHOP = 'OPEN_SHOP'
-}
-
 function Board({
   board,
   cityList,
@@ -55,6 +52,7 @@ function Board({
   );
   const [actionList, setActionList] = useState<ACTION_ENUM[]>([]);
   const [showShop, setShowShop] = useState<boolean>(false);
+  const [showBuildMenu, setShowBuildMenu] = useState<boolean>(false);
 
   const activePlayer = useActivePlayerContext();
 
@@ -186,10 +184,12 @@ function Board({
       selectedHex,
       activePlayer,
       cityList,
+      board,
       pnjInDestinationHex,
       selectedPnj
     );
     setShowShop(false);
+    setShowBuildMenu(false);
 
     switch (actionToTrigger) {
       case SELECTED_HEX_ACTION.HEAL_ALLY:
@@ -215,6 +215,9 @@ function Board({
         break;
       case SELECTED_HEX_ACTION.OPEN_SHOP:
         setShowShop(true);
+        break;
+      case SELECTED_HEX_ACTION.OPEN_SHOP:
+        setShowBuildMenu(true);
         break;
       default:
         break;
@@ -311,7 +314,7 @@ function Board({
       <div className="right-menu">
         <ActionMenu actionList={actionList} triggerAction={triggerAction} />
         {showShop ? <ShopMenu /> : ''}
-        <BuildMenu />
+        {showBuildMenu ? <BuildMenu /> : ''}
       </div>
     </>
   );

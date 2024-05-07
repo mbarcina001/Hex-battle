@@ -4,11 +4,12 @@ import {
   City,
   Hex,
   Pnj,
-  SelectedPnj
+  SelectedPnj,
+  SELECTED_HEX_ACTION
 } from '../App.constants';
-import { SELECTED_HEX_ACTION } from '../components/Board/Board';
-import { getCityInHex } from './CityUtils';
+import { getCityInHex, isAllyCity } from './CityUtils';
 import { isAllyPnj, isEnemyPnj } from './PnjUtils';
+import { getAdjacentHexIds } from './AdjacencyUtils';
 
 /**
  * Gets initial game board
@@ -40,35 +41,126 @@ export function getActionToTriggerInSelectedHex(
   selectedHexId: string,
   activePlayer: Player,
   cityList: City[],
+  board: Hex[][],
   pnjInDestinationHex?: Pnj,
   selectedPnj?: SelectedPnj
 ): SELECTED_HEX_ACTION {
-  if (
-    selectedPnj?.whichPnj.canMove &&
-    selectedPnj?.destinationHexs?.includes(selectedHexId)
-  ) {
-    if (pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer)) {
+  if (_canSelectedPnjMoveToSelectedHex(selectedHexId, selectedPnj)) {
+    if (_canHealPnjInHex(activePlayer, pnjInDestinationHex)) {
       return SELECTED_HEX_ACTION.HEAL_ALLY;
-    } else if (
-      pnjInDestinationHex &&
-      isEnemyPnj(pnjInDestinationHex, activePlayer)
-    ) {
+    } else if (_canAttackPnjInHex(activePlayer, pnjInDestinationHex)) {
       return SELECTED_HEX_ACTION.ATTACK_ENEMY;
     } else {
       return SELECTED_HEX_ACTION.MOVE_PNJ;
     }
   } else if (
-    !pnjInDestinationHex &&
-    getCityInHex(selectedHexId, cityList)?.owner?.id === activePlayer.playerId
+    _destinationHexContainsUnoccupaidCity(
+      selectedHexId,
+      cityList,
+      activePlayer,
+      pnjInDestinationHex
+    )
   ) {
     return SELECTED_HEX_ACTION.OPEN_SHOP;
   } else if (
-    pnjInDestinationHex &&
-    isAllyPnj(pnjInDestinationHex, activePlayer) &&
-    pnjInDestinationHex.canMove
+    _destinationHexCanOwnBuilding(
+      selectedHexId,
+      cityList,
+      activePlayer,
+      board,
+      pnjInDestinationHex
+    )
+  ) {
+    return SELECTED_HEX_ACTION.OPEN_BUILD_MENU;
+  } else if (
+    _destinationHexContainsAllyPnjWhichCanMove(
+      activePlayer,
+      pnjInDestinationHex
+    )
   ) {
     return SELECTED_HEX_ACTION.SELECT_PNJ;
   } else {
     return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
   }
+}
+
+function _canSelectedPnjMoveToSelectedHex(
+  selectedHexId: string,
+  selectedPnj?: SelectedPnj
+): boolean {
+  return (
+    !!selectedPnj &&
+    selectedPnj.whichPnj.canMove &&
+    selectedPnj.destinationHexs.includes(selectedHexId)
+  );
+}
+
+function _canHealPnjInHex(
+  activePlayer: Player,
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return !!pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer);
+}
+
+function _canAttackPnjInHex(
+  activePlayer: Player,
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return !!pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer);
+}
+
+function _destinationHexContainsUnoccupaidCity(
+  selectedHexId: string,
+  cityList: City[],
+  activePlayer: Player,
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return (
+    !pnjInDestinationHex &&
+    getCityInHex(selectedHexId, cityList)?.owner?.id === activePlayer.playerId
+  );
+}
+
+function _destinationHexContainsAllyPnjWhichCanMove(
+  activePlayer: Player,
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return (
+    !!pnjInDestinationHex &&
+    isAllyPnj(pnjInDestinationHex, activePlayer) &&
+    pnjInDestinationHex.canMove
+  );
+}
+
+function _destinationHexCanOwnBuilding(
+  selectedHexId: string,
+  cityList: City[],
+  activePlayer: Player,
+  board: Hex[][],
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return (
+    !_checkIfHexContainsEnemyPnj(activePlayer, pnjInDestinationHex) &&
+    _hexHasAdjacentAllyCity(selectedHexId, cityList, activePlayer, board)
+  );
+}
+
+function _checkIfHexContainsEnemyPnj(
+  activePlayer: Player,
+  pnjInDestinationHex?: Pnj
+): boolean {
+  return !pnjInDestinationHex || isAllyPnj(pnjInDestinationHex, activePlayer);
+}
+
+function _hexHasAdjacentAllyCity(
+  selectedHexId: string,
+  cityList: City[],
+  activePlayer: Player,
+  board: Hex[][]
+): boolean {
+  const adjacentHexs = getAdjacentHexIds(selectedHexId, board);
+  return adjacentHexs.some((hex) => {
+    const cityInHex = getCityInHex(hex, cityList);
+    return !!cityInHex && isAllyCity(cityInHex, activePlayer);
+  });
 }
