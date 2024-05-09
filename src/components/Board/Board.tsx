@@ -5,15 +5,11 @@ import HexComp from '../Hex/Hex';
 
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
 
-import { getAdjacentHexIds } from '../../utils/AdjacencyUtils';
-import {
-  getPnjInHex,
-  healPnj,
-  performAttack,
-  performCounterAttack,
-  withdrawPnj,
-  healSelf
-} from '../../utils/PnjUtils';
+import AdjacencyUtils from '../../utils/AdjacencyUtils';
+import PnjUtils from '../../utils/PnjUtils';
+import CityUtils from '../../utils/CityUtils';
+import BoardUtils from '../../utils/BoardUtils';
+import PlayerUtils from '../../utils/PlayerUtils';
 
 import {
   Player,
@@ -27,15 +23,6 @@ import {
 } from '../../App.constants';
 import ActionMenu, { ACTION_ENUM } from '../ActionMenu/ActionMenu';
 
-import {
-  captureCity,
-  getAdjacentCityIfAny,
-  getCityInHex,
-  getBuildingInHex,
-  isEnemyCity
-} from '../../utils/CityUtils';
-import { findPlayerById } from '../../utils/PlayerUtils';
-import { getActionToTriggerInSelectedHex } from '../../utils/BoardUtils';
 import PnjMenu from '../PnjMenu/PnjMenu';
 import BuildMenu from '../BuildMenu/BuildMenu';
 
@@ -48,6 +35,11 @@ interface BoardProps {
   changeTurn: () => void;
 }
 
+/**
+ * Component that displays game board
+ * @param {BoardProps} props
+ * @returns {ReactElement}
+ */
 function Board({
   board,
   cityList,
@@ -72,7 +64,7 @@ function Board({
    * @returns {string[]}
    */
   function getPnjAdjacentHexs(pnjInHex: Pnj): string[] {
-    return getAdjacentHexIds(pnjInHex.hexLocationId, board);
+    return AdjacencyUtils.getAdjacentHexIds(pnjInHex.hexLocationId, board);
   }
 
   /**
@@ -84,7 +76,7 @@ function Board({
     if (!healerPnj || !restoredPnj) {
       return;
     }
-    healPnj(healerPnj, restoredPnj);
+    PnjUtils.healPnj(healerPnj, restoredPnj);
     updatePlayers([activePlayer]);
   }
 
@@ -101,27 +93,33 @@ function Board({
       return;
     }
 
-    const attackerOwner = findPlayerById(playerList, attackingPnj.owner.id);
-    const defenderOwner = findPlayerById(playerList, attackedPnj.owner.id);
+    const attackerOwner = PlayerUtils.findPlayerById(
+      playerList,
+      attackingPnj.owner.id
+    );
+    const defenderOwner = PlayerUtils.findPlayerById(
+      playerList,
+      attackedPnj.owner.id
+    );
 
     if (!attackerOwner || !defenderOwner) {
       return;
     }
 
-    let isPnjDead = performAttack(attackingPnj, attackedPnj);
+    let isPnjDead = PnjUtils.performAttack(attackingPnj, attackedPnj);
 
     if (isPnjDead) {
-      withdrawPnj(attackedPnj, defenderOwner);
+      PnjUtils.withdrawPnj(attackedPnj, defenderOwner);
       movePnj(attackingPnj, selectedHex, false);
       updatePlayers([activePlayer, defenderOwner]);
       return;
     }
 
     attackingPnj.canMove = false;
-    isPnjDead = performCounterAttack(attackedPnj, attackingPnj);
+    isPnjDead = PnjUtils.performCounterAttack(attackedPnj, attackingPnj);
 
     if (isPnjDead) {
-      withdrawPnj(attackingPnj, attackerOwner);
+      PnjUtils.withdrawPnj(attackingPnj, attackerOwner);
     }
 
     updatePlayers([activePlayer, defenderOwner, attackerOwner]);
@@ -157,7 +155,7 @@ function Board({
 
   /**
    * Moves received pnj to received location
-   * @param {Pnj} selectedPnj
+   * @param {Pnj} pnjToMove
    * @param {string} locationToMove
    * @param {boolean} callUpdate
    */
@@ -175,8 +173,12 @@ function Board({
     }
   }
 
+  /**
+   * Retrieves new visibles hexs after Player moves a Pnj and adds them to visibles hexs list
+   * @param {string} newLocation
+   */
   function addNewVisibleHexsAfterMovement(newLocation: string): void {
-    for (const hexId of getAdjacentHexIds(newLocation, board)) {
+    for (const hexId of AdjacencyUtils.getAdjacentHexIds(newLocation, board)) {
       if (!activePlayer.visibleHexsIds.includes(hexId)) {
         activePlayer.visibleHexsIds.push(hexId);
       }
@@ -189,8 +191,8 @@ function Board({
    *  - Show destination nodes if pnj is in hex
    */
   function triggerSelectedHexActions(): void {
-    const pnjInDestinationHex = getPnjInHex(selectedHex, playerList);
-    const actionToTrigger = getActionToTriggerInSelectedHex(
+    const pnjInDestinationHex = PnjUtils.getPnjInHex(selectedHex, playerList);
+    const actionToTrigger = BoardUtils.getActionToTriggerInSelectedHex(
       selectedHex,
       activePlayer,
       cityList,
@@ -242,7 +244,7 @@ function Board({
     switch (action) {
       case ACTION_ENUM.HEAL_ACTIVE_PNJ:
         if (selectedPnj) {
-          healSelf(selectedPnj.whichPnj);
+          PnjUtils.healSelf(selectedPnj.whichPnj);
           updatePlayers([activePlayer]);
         }
         break;
@@ -250,13 +252,13 @@ function Board({
         if (!selectedPnj) {
           break;
         }
-        const cityToCapture = getCityInHex(
+        const cityToCapture = CityUtils.getCityInHex(
           selectedPnj.whichPnj.hexLocationId,
           cityList
         );
 
         if (cityToCapture) {
-          captureCity(cityToCapture, activePlayer);
+          CityUtils.captureCity(cityToCapture, activePlayer);
           selectedPnj.whichPnj.canMove = false;
         }
 
@@ -272,8 +274,16 @@ function Board({
     setSelectedHex('');
   }
 
+  /**
+   * Adds new building of received type to selected hex's adjacent city
+   * @param {BuildingType} buildingType
+   */
   function purchaseBuilding(buildingType: BuildingType): void {
-    const cityToUpgrade = getAdjacentCityIfAny(selectedHex, board, cityList);
+    const cityToUpgrade = CityUtils.getAdjacentCityIfAny(
+      selectedHex,
+      board,
+      cityList
+    );
 
     if (cityToUpgrade) {
       cityToUpgrade.buildings.push({
@@ -287,10 +297,14 @@ function Board({
     }
   }
 
-  function purchasePnj(pnj: PnjType): void {
-    activePlayer.gold -= pnj.goldCost;
+  /**
+   * Adds new Pnj of received type to active Player's pnj list
+   * @param {PnjType} pnjType
+   */
+  function purchasePnj(pnjType: PnjType): void {
+    activePlayer.gold -= pnjType.goldCost;
     activePlayer.pnjList.push({
-      type: pnj.type,
+      type: pnjType,
       id: `pnj_999`, // TODO: GIVE UNIQUE ID
       owner: {
         id: activePlayer.playerId,
@@ -298,9 +312,7 @@ function Board({
       },
       hexLocationId: selectedHex,
       canMove: false,
-      attack: pnj.attack,
-      defense: pnj.defense,
-      healthPoints: pnj.maxHealthPoints
+      healthPoints: pnjType.maxHealthPoints
     });
     updatePlayers([activePlayer]);
   }
@@ -315,11 +327,11 @@ function Board({
     if (selectedPnj) {
       actions.push(ACTION_ENUM.HEAL_ACTIVE_PNJ);
 
-      const cityInHex = getCityInHex(
+      const cityInHex = CityUtils.getCityInHex(
         selectedPnj.whichPnj.hexLocationId,
         cityList
       );
-      if (cityInHex && isEnemyCity(cityInHex, activePlayer)) {
+      if (cityInHex && CityUtils.isEnemyCity(cityInHex, activePlayer)) {
         actions.push(ACTION_ENUM.CAPTURE_CITY);
       }
     }
@@ -345,9 +357,12 @@ function Board({
                 isDestinationHex={
                   selectedPnj?.destinationHexs?.includes(boardHex.id) ?? false
                 }
-                pnjInHex={getPnjInHex(boardHex.id, playerList)}
-                cityInHex={getCityInHex(boardHex.id, cityList)}
-                buildingInHex={getBuildingInHex(boardHex.id, cityList)}
+                pnjInHex={PnjUtils.getPnjInHex(boardHex.id, playerList)}
+                cityInHex={CityUtils.getCityInHex(boardHex.id, cityList)}
+                buildingInHex={CityUtils.getBuildingInHex(
+                  boardHex.id,
+                  cityList
+                )}
                 setAsSelected={setSelectedHex}
               />
             </div>

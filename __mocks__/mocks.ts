@@ -1,45 +1,62 @@
-import { Player } from '../src/App';
-import { City } from '../src/components/City/City';
-import { Hex } from '../src/components/Hex/Hex';
-import { Pnj, Owner } from '../src/components/Pnj/Pnj';
+import {
+  Owner,
+  Pnj,
+  City,
+  Player,
+  Hex,
+  PNJ_TYPE_NAME,
+  PnjType
+} from '../src/App.constants';
 
 const mockOwner: Owner = {
   id: 1,
   color: 'red'
 };
 
+const mockPnjType: PnjType = {
+  typeName: PNJ_TYPE_NAME.SOLDIER,
+  goldCost: 2,
+  maxHealthPoints: 2,
+  attack: 2,
+  defense: 2,
+  movementRange: 2,
+  visionRange: 2,
+  attackRange: 2,
+  abilities: []
+};
+
 export const mockPnj: Pnj = {
-  type: 'mockType',
+  type: mockPnjType,
   id: '007',
   owner: mockOwner,
   canMove: false,
   hexLocationId: '1_1',
-  attack: 10,
-  defense: 10,
   healthPoints: 20
 };
 
 export const mockCity: City = {
   name: 'Mock City',
   id: '0',
-  ownerId: 1,
-  hexLocationId: '1_1'
+  owner: mockOwner,
+  hexLocationId: '1_1',
+  isCapitalCity: true,
+  buildings: []
 };
 
 export const mockPlayer1: Player = {
   playerId: 1,
   playerColor: 'red',
   pnjList: [mockPnj],
-  cityList: [mockCity],
-  visibleHexsIds: []
+  visibleHexsIds: [],
+  gold: 0
 };
 
 export const mockPlayer2: Player = {
   playerId: 2,
   playerColor: 'blue',
   pnjList: [],
-  cityList: [],
-  visibleHexsIds: []
+  visibleHexsIds: [],
+  gold: 0
 };
 
 export const mockBoard: Hex[][] = [

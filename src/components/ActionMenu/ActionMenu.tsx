@@ -12,6 +12,11 @@ interface ActionMenuProps {
   triggerAction: (action: ACTION_ENUM) => void;
 }
 
+/**
+ * Component that displays user actions (eg: End turn, heal pnj, capture city, etc.)
+ * @param {ActionMenuProps} props
+ * @returns {ReactElement}
+ */
 function ActionMenu({
   actionList,
   triggerAction

@@ -25,7 +25,8 @@ export interface VisibleHexsByPlayer {
   visibleHexsIds: string[];
 }
 
-export enum PNJ_TYPE {
+export enum PNJ_TYPE_NAME {
+  NO_PNJ = 'NOOOOOOOO',
   SOLDIER = 'Soldier',
   EXPLORER = 'Explorer',
   ARCHER = 'Archer',
@@ -38,7 +39,7 @@ export enum PNJ_ABILITY {
 }
 
 export interface PnjType {
-  type: PNJ_TYPE;
+  typeName: PNJ_TYPE_NAME;
   goldCost: number;
   maxHealthPoints: number;
   attack: number;
@@ -50,17 +51,15 @@ export interface PnjType {
 }
 
 export interface Pnj {
-  type: string;
+  type: PnjType;
   id: string;
   owner: Owner;
   canMove: boolean;
   hexLocationId: string;
-  attack: number;
-  defense: number;
   healthPoints: number;
 }
 
-export enum BUILDING_TYPE {
+export enum BUILDING_TYPE_NAME {
   WINDMILL = 'Windmill',
   WELL = 'Well',
   WOOD_CHOP = 'Wood chop',
@@ -74,7 +73,7 @@ export interface Building {
 }
 
 export interface BuildingType {
-  typeName: BUILDING_TYPE;
+  typeName: BUILDING_TYPE_NAME;
   goldCost: number;
   goldEarnings: number;
   allowedHexTypes: HEX_TYPE[];
@@ -157,7 +156,18 @@ export const CITY_NAMES: string[] = [
 
 export const PNJ_TYPES: PnjType[] = [
   {
-    type: PNJ_TYPE.EXPLORER,
+    typeName: PNJ_TYPE_NAME.NO_PNJ,
+    goldCost: 0,
+    maxHealthPoints: 0,
+    attack: 0,
+    defense: 0,
+    movementRange: 0,
+    visionRange: 0,
+    attackRange: 0,
+    abilities: []
+  },
+  {
+    typeName: PNJ_TYPE_NAME.EXPLORER,
     goldCost: 2,
     maxHealthPoints: 0,
     attack: 0,
@@ -168,18 +178,18 @@ export const PNJ_TYPES: PnjType[] = [
     abilities: [PNJ_ABILITY.MOVE_AFTER_KILL]
   },
   {
-    type: PNJ_TYPE.SOLDIER,
+    typeName: PNJ_TYPE_NAME.SOLDIER,
     goldCost: 3,
-    maxHealthPoints: 0,
-    attack: 0,
-    defense: 0,
+    maxHealthPoints: 10,
+    attack: 6,
+    defense: 2,
     movementRange: 1,
     visionRange: 1,
     attackRange: 1,
     abilities: [PNJ_ABILITY.MOVE_AFTER_KILL]
   },
   {
-    type: PNJ_TYPE.ARCHER,
+    typeName: PNJ_TYPE_NAME.ARCHER,
     goldCost: 6,
     maxHealthPoints: 0,
     attack: 0,
@@ -190,7 +200,7 @@ export const PNJ_TYPES: PnjType[] = [
     abilities: []
   },
   {
-    type: PNJ_TYPE.GUARDIAN,
+    typeName: PNJ_TYPE_NAME.GUARDIAN,
     goldCost: 8,
     maxHealthPoints: 0,
     attack: 0,
@@ -201,7 +211,7 @@ export const PNJ_TYPES: PnjType[] = [
     abilities: []
   },
   {
-    type: PNJ_TYPE.KNIGHT,
+    typeName: PNJ_TYPE_NAME.KNIGHT,
     goldCost: 12,
     maxHealthPoints: 0,
     attack: 0,
@@ -215,31 +225,31 @@ export const PNJ_TYPES: PnjType[] = [
 
 export const BUILDING_TYPES: BuildingType[] = [
   {
-    typeName: BUILDING_TYPE.WELL,
+    typeName: BUILDING_TYPE_NAME.WELL,
     goldCost: 3,
     goldEarnings: 1,
     allowedHexTypes: [HEX_TYPE.DESERT]
   },
   {
-    typeName: BUILDING_TYPE.WINDMILL,
+    typeName: BUILDING_TYPE_NAME.WINDMILL,
     goldCost: 3,
     goldEarnings: 1,
     allowedHexTypes: [HEX_TYPE.GRASS]
   },
   {
-    typeName: BUILDING_TYPE.MARKET,
+    typeName: BUILDING_TYPE_NAME.MARKET,
     goldCost: 4,
     goldEarnings: 2,
     allowedHexTypes: [HEX_TYPE.GRASS, HEX_TYPE.DESERT]
   },
   {
-    typeName: BUILDING_TYPE.WOOD_CHOP,
+    typeName: BUILDING_TYPE_NAME.WOOD_CHOP,
     goldCost: 7,
     goldEarnings: 3,
     allowedHexTypes: [HEX_TYPE.GRASS]
   },
   {
-    typeName: BUILDING_TYPE.GOLD_MINE,
+    typeName: BUILDING_TYPE_NAME.GOLD_MINE,
     goldCost: 7,
     goldEarnings: 3,
     allowedHexTypes: [HEX_TYPE.DESERT]

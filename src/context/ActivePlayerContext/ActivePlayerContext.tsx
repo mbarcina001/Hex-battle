@@ -5,6 +5,10 @@ export const ActivePlayerContext = React.createContext<Player | undefined>(
   undefined
 );
 
+/**
+ * Context for ActivePlayer
+ * @returns {Player}
+ */
 export function useActivePlayerContext(): Player {
   const activePlayer = useContext(ActivePlayerContext);
 

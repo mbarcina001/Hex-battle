@@ -5,8 +5,13 @@ interface BuildingCompProps {
   building: Building;
 }
 
-function CityComp({ building }: BuildingCompProps): ReactElement {
+/**
+ * Component that shows received Building's name
+ * @param {BuildingCompProps} prop
+ * @returns {ReactElement}
+ */
+function BuildingComp({ building }: BuildingCompProps): ReactElement {
   return <span>{building.type.typeName.toString()}</span>;
 }
 
-export default CityComp;
+export default BuildingComp;

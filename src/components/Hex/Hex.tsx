@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { useActivePlayerContext } from '../../context/ActivePlayerContext/ActivePlayerContext';
-import { isAllyPnj } from '../../utils/PnjUtils';
+import PnjUtils from '../../utils/PnjUtils';
 import CityComp from '../City/City';
 import PnjComp from '../Pnj/Pnj';
 import BuildingComp from '../Building/Building';
@@ -18,6 +18,11 @@ interface HexProps {
   setAsSelected: (hexId: string) => void;
 }
 
+/**
+ * Displays received Hex
+ * @param {HexProps} props
+ * @returns {ReactElement}
+ */
 function HexComp({
   hex,
   isSelected,
@@ -54,7 +59,7 @@ function HexComp({
    */
   function getDestinationHexBackgroundColorClass(): string {
     if (isDestinationHex && pnjInHex) {
-      if (isAllyPnj(pnjInHex, activePlayer)) {
+      if (PnjUtils.isAllyPnj(pnjInHex, activePlayer)) {
         return 'ally';
       }
 

@@ -11,6 +11,11 @@ interface MenuButtonProps {
   onPurchaseItem: () => void;
 }
 
+/**
+ * Component that displays a buttton for purchase menus (BuildMenu and PnjMenu)
+ * @param {MenuButtonProps} props
+ * @returns {ReactElement}
+ */
 function MenuButton({
   text,
   cost,

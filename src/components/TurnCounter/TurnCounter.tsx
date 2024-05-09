@@ -8,6 +8,11 @@ interface TurnCounterProps {
   turnNumber: number;
 }
 
+/**
+ * Displays current turn info (active player name, active player gold, turn number, etc.)
+ * @param {TurnCounterProps} props
+ * @returns {ReactElement}
+ */
 function TurnCounter({ turnNumber }: TurnCounterProps): ReactElement {
   const activePlayer = useActivePlayerContext();
 

@@ -6,17 +6,17 @@ import Board from './components/Board/Board';
 import { ActivePlayerContext } from './context/ActivePlayerContext/ActivePlayerContext';
 import { Hex, City, Player } from './App.constants';
 
-import { getInitialBoard } from './utils/BoardUtils';
-import {
-  calculatePlayerGoldOnTurnStart,
-  getActivePlayer,
-  getDummyPlayer,
-  getInitialPlayer
-} from './utils/PlayerUtils';
-import { checkWinner } from './utils/GameUtils';
-import TurnCounter from './components/TurnCounter/TurnCounter';
-import { getInitialCity } from './utils/CityUtils';
+import BoardUtils from './utils/BoardUtils';
+import CityUtils from './utils/CityUtils';
+import GameUtils from './utils/GameUtils';
+import PlayerUtils from './utils/PlayerUtils';
 
+import TurnCounter from './components/TurnCounter/TurnCounter';
+
+/**
+ * Main app component
+ * @returns {ReactElement}
+ */
 function App(): ReactElement {
   const [activePlayerId, setActivePlayerId] = useState<number>(-1);
   const [playerList, setPlayerList] = useState<Player[]>([]);
@@ -31,10 +31,10 @@ function App(): ReactElement {
   function initializeCityList(): void {
     const cities: City[] = [];
 
-    cities.push(getInitialCity(cities, board));
-    cities.push(getInitialCity(cities, board));
-    cities.push(getInitialCity(cities, board));
-    cities.push(getInitialCity(cities, board));
+    cities.push(CityUtils.getInitialCity(cities, board));
+    cities.push(CityUtils.getInitialCity(cities, board));
+    cities.push(CityUtils.getInitialCity(cities, board));
+    cities.push(CityUtils.getInitialCity(cities, board));
 
     setCityList(cities);
   }
@@ -44,8 +44,8 @@ function App(): ReactElement {
    */
   function intializePlayerList(): void {
     const players: Player[] = [
-      getInitialPlayer(1, 'red', board, cityList),
-      getInitialPlayer(2, 'blue', board, cityList)
+      PlayerUtils.getInitialPlayer(1, 'red', board, cityList),
+      PlayerUtils.getInitialPlayer(2, 'blue', board, cityList)
     ];
 
     setPlayerList(players);
@@ -58,7 +58,7 @@ function App(): ReactElement {
    * @returns { void }
    */
   function changeTurn(): void {
-    const winPlayer = checkWinner(playerList, cityList);
+    const winPlayer = GameUtils.checkWinner(playerList, cityList);
     if (winPlayer) {
       setWinner(winPlayer);
       return;
@@ -160,7 +160,7 @@ function App(): ReactElement {
 
   useEffect(() => {
     if (!board.length) {
-      setBoard(getInitialBoard);
+      setBoard(BoardUtils.getInitialBoard);
     }
   }, [board]);
 
@@ -193,17 +193,21 @@ function App(): ReactElement {
         })
       );
       playerListCopy[activePlayerIdx].pnjList = updatedPnjList;
-      playerListCopy[activePlayerIdx].gold += calculatePlayerGoldOnTurnStart(
-        playerListCopy[activePlayerIdx],
-        cityList
-      );
+      playerListCopy[activePlayerIdx].gold +=
+        PlayerUtils.calculatePlayerGoldOnTurnStart(
+          playerListCopy[activePlayerIdx],
+          cityList
+        );
       setPlayerList(playerListCopy);
     }
   }, [activePlayerId]);
 
   return (
     <ActivePlayerContext.Provider
-      value={getActivePlayer(playerList, activePlayerId) ?? getDummyPlayer()}
+      value={
+        PlayerUtils.getActivePlayer(playerList, activePlayerId) ??
+        PlayerUtils.getDummyPlayer()
+      }
     >
       <TurnCounter turnNumber={actualTurn}></TurnCounter>
 

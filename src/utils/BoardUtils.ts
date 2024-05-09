@@ -7,164 +7,247 @@ import {
   SelectedPnj,
   SELECTED_HEX_ACTION
 } from '../App.constants';
-import { getCityInHex, isAllyCity, getAdjacentCityIfAny } from './CityUtils';
-import { isAllyPnj, isEnemyPnj } from './PnjUtils';
+import CityUtils from './CityUtils';
+import PnjUtils from './PnjUtils';
 
 /**
- * Gets initial game board
- * @returns {Hex[][]}
+ * Class with utilities for board
  */
-export function getInitialBoard(): Hex[][] {
-  const board: Hex[][] = [];
-  BOARD_TYPES.forEach((_, idx) => {
-    const row: Hex[] = [];
+export default class BoardUtils {
+  /**
+   * Gets initial game board
+   * @returns {Hex[]}
+   */
+  public static getInitialBoard(): Hex[][] {
+    const board: Hex[][] = [];
+    BOARD_TYPES.forEach((_, idx) => {
+      const row: Hex[] = [];
 
-    BOARD_TYPES[idx].forEach((__, jdx) => {
-      row.push({
-        id: `${jdx}_${idx}`,
-        type: BOARD_TYPES[idx][jdx]
+      BOARD_TYPES[idx].forEach((__, jdx) => {
+        row.push({
+          id: `${jdx}_${idx}`,
+          type: BOARD_TYPES[idx][jdx]
+        });
       });
+
+      board.push(row);
     });
 
-    board.push(row);
-  });
+    return board;
+  }
 
-  return board;
-}
+  /**
+   * Gets which action is triggered after selecting received hex
+   * @param {string} selectedHexId
+   * @param {Player} activePlayer
+   * @param {City[]} cityList
+   * @param {Hex[]} board
+   * @param {Pnj | undefined} pnjInDestinationHex
+   * @param {SelectedPnj | undefined} selectedPnj
+   * @returns {SELECTED_HEX_ACTION}
+   */
+  public static getActionToTriggerInSelectedHex(
+    selectedHexId: string,
+    activePlayer: Player,
+    cityList: City[],
+    board: Hex[][],
+    pnjInDestinationHex?: Pnj,
+    selectedPnj?: SelectedPnj
+  ): SELECTED_HEX_ACTION {
+    if (this._canSelectedPnjMoveToSelectedHex(selectedHexId, selectedPnj)) {
+      if (this._canHealPnjInHex(activePlayer, pnjInDestinationHex)) {
+        return SELECTED_HEX_ACTION.HEAL_ALLY;
+      }
 
-/**
- * Gets which action is triggered after selecting received hex
- * @returns {SELECTED_HEX_ACTION}
- */
-export function getActionToTriggerInSelectedHex(
-  selectedHexId: string,
-  activePlayer: Player,
-  cityList: City[],
-  board: Hex[][],
-  pnjInDestinationHex?: Pnj,
-  selectedPnj?: SelectedPnj
-): SELECTED_HEX_ACTION {
-  if (_canSelectedPnjMoveToSelectedHex(selectedHexId, selectedPnj)) {
-    if (_canHealPnjInHex(activePlayer, pnjInDestinationHex)) {
-      return SELECTED_HEX_ACTION.HEAL_ALLY;
+      if (this._canAttackPnjInHex(activePlayer, pnjInDestinationHex)) {
+        return SELECTED_HEX_ACTION.ATTACK_ENEMY;
+      }
+
+      return SELECTED_HEX_ACTION.MOVE_PNJ;
     }
 
-    if (_canAttackPnjInHex(activePlayer, pnjInDestinationHex)) {
-      return SELECTED_HEX_ACTION.ATTACK_ENEMY;
+    if (
+      this._destinationHexContainsAllyPnjWhichCanMove(
+        activePlayer,
+        pnjInDestinationHex
+      )
+    ) {
+      return SELECTED_HEX_ACTION.SELECT_PNJ;
     }
 
-    return SELECTED_HEX_ACTION.MOVE_PNJ;
+    if (
+      this._destinationHexContainsUnoccupiedCity(
+        selectedHexId,
+        cityList,
+        activePlayer,
+        pnjInDestinationHex
+      )
+    ) {
+      return SELECTED_HEX_ACTION.OPEN_SHOP;
+    }
+
+    if (
+      this._destinationHexCanOwnBuilding(
+        selectedHexId,
+        cityList,
+        activePlayer,
+        board,
+        pnjInDestinationHex
+      )
+    ) {
+      return SELECTED_HEX_ACTION.OPEN_BUILD_MENU;
+    }
+
+    return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
   }
 
-  if (
-    _destinationHexContainsAllyPnjWhichCanMove(
-      activePlayer,
-      pnjInDestinationHex
-    )
-  ) {
-    return SELECTED_HEX_ACTION.SELECT_PNJ;
+  /**
+   * Checks if selected Pnj can move to selected Hex
+   * @param {string} selectedHexId
+   * @param {SelectedPnj} selectedPnj
+   * @returns {boolean}
+   */
+  public static _canSelectedPnjMoveToSelectedHex(
+    selectedHexId: string,
+    selectedPnj?: SelectedPnj
+  ): boolean {
+    return (
+      !!selectedPnj &&
+      selectedPnj.whichPnj.canMove &&
+      selectedPnj.destinationHexs.includes(selectedHexId)
+    );
   }
 
-  if (
-    _destinationHexContainsUnoccupiedCity(
+  /**
+   * Checks if Pnj in destination hex can be healed by active P^layer
+   * @param {Player} activePlayer
+   * @param {Pnj | undefined} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _canHealPnjInHex(
+    activePlayer: Player,
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !!pnjInDestinationHex &&
+      PnjUtils.isAllyPnj(pnjInDestinationHex, activePlayer)
+    );
+  }
+
+  /**
+   * Checks if Pnj in destination hex can be attacked by active P^layer
+   * @param {Player} activePlayer
+   * @param {Pnj | undefined} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _canAttackPnjInHex(
+    activePlayer: Player,
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !!pnjInDestinationHex &&
+      PnjUtils.isEnemyPnj(pnjInDestinationHex, activePlayer)
+    );
+  }
+
+  /**
+   * Checks if destination Hex contains an city with no Owner
+   * @param {string} selectedHexId
+   * @param {City[]} cityList
+   * @param {Player} activePlayer
+   * @param {Pnj} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _destinationHexContainsUnoccupiedCity(
+    selectedHexId: string,
+    cityList: City[],
+    activePlayer: Player,
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !pnjInDestinationHex &&
+      CityUtils.getCityInHex(selectedHexId, cityList)?.owner?.id ===
+        activePlayer.playerId
+    );
+  }
+
+  /**
+   * Checks if selected hex contains a Pnj belonging active Player that can move
+   * @param {Player} activePlayer
+   * @param {Pnj | undefined} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _destinationHexContainsAllyPnjWhichCanMove(
+    activePlayer: Player,
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !!pnjInDestinationHex &&
+      PnjUtils.isAllyPnj(pnjInDestinationHex, activePlayer) &&
+      pnjInDestinationHex.canMove
+    );
+  }
+
+  /**
+   * Checks if destination hex can have a building. True if:
+   *  - Has a adjacent City
+   *  - City is owned by active Player
+   *  - Hex is not ocuppied by an enemy Pnj
+   * @param {string} selectedHexId
+   * @param {City[]} cityList
+   * @param {Player} activePlayer
+   * @param {Hex[]} board
+   * @param {Pnj | undefined} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _destinationHexCanOwnBuilding(
+    selectedHexId: string,
+    cityList: City[],
+    activePlayer: Player,
+    board: Hex[][],
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !this._checkIfHexContainsEnemyPnj(activePlayer, pnjInDestinationHex) &&
+      this._hexHasAdjacentAllyCity(selectedHexId, cityList, activePlayer, board)
+    );
+  }
+
+  /**
+   * Checks if received Pnj is an enemy Pnj
+   * @param {Player} activePlayer
+   * @param {Pnj} pnjInDestinationHex
+   * @returns {boolean}
+   */
+  public static _checkIfHexContainsEnemyPnj(
+    activePlayer: Player,
+    pnjInDestinationHex?: Pnj
+  ): boolean {
+    return (
+      !!pnjInDestinationHex &&
+      PnjUtils.isEnemyPnj(pnjInDestinationHex, activePlayer)
+    );
+  }
+
+  /**
+   * Checks if received hex has an adjacent City owned by active Player
+   * @param {string} selectedHexId
+   * @param {City []} cityList
+   * @param {Player} activePlayer
+   * @param {Hex[]} board
+   * @returns {boolean}
+   */
+  public static _hexHasAdjacentAllyCity(
+    selectedHexId: string,
+    cityList: City[],
+    activePlayer: Player,
+    board: Hex[][]
+  ): boolean {
+    const adjacentCity = CityUtils.getAdjacentCityIfAny(
       selectedHexId,
-      cityList,
-      activePlayer,
-      pnjInDestinationHex
-    )
-  ) {
-    return SELECTED_HEX_ACTION.OPEN_SHOP;
-  }
-
-  if (
-    _destinationHexCanOwnBuilding(
-      selectedHexId,
-      cityList,
-      activePlayer,
       board,
-      pnjInDestinationHex
-    )
-  ) {
-    return SELECTED_HEX_ACTION.OPEN_BUILD_MENU;
+      cityList
+    );
+    return !!adjacentCity && CityUtils.isAllyCity(adjacentCity, activePlayer);
   }
-
-  return SELECTED_HEX_ACTION.CLEAR_SELECTED_PNJ;
-}
-
-function _canSelectedPnjMoveToSelectedHex(
-  selectedHexId: string,
-  selectedPnj?: SelectedPnj
-): boolean {
-  return (
-    !!selectedPnj &&
-    selectedPnj.whichPnj.canMove &&
-    selectedPnj.destinationHexs.includes(selectedHexId)
-  );
-}
-
-function _canHealPnjInHex(
-  activePlayer: Player,
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return !!pnjInDestinationHex && isAllyPnj(pnjInDestinationHex, activePlayer);
-}
-
-function _canAttackPnjInHex(
-  activePlayer: Player,
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return !!pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer);
-}
-
-function _destinationHexContainsUnoccupiedCity(
-  selectedHexId: string,
-  cityList: City[],
-  activePlayer: Player,
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return (
-    !pnjInDestinationHex &&
-    getCityInHex(selectedHexId, cityList)?.owner?.id === activePlayer.playerId
-  );
-}
-
-function _destinationHexContainsAllyPnjWhichCanMove(
-  activePlayer: Player,
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return (
-    !!pnjInDestinationHex &&
-    isAllyPnj(pnjInDestinationHex, activePlayer) &&
-    pnjInDestinationHex.canMove
-  );
-}
-
-function _destinationHexCanOwnBuilding(
-  selectedHexId: string,
-  cityList: City[],
-  activePlayer: Player,
-  board: Hex[][],
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return (
-    !_checkIfHexContainsEnemyPnj(activePlayer, pnjInDestinationHex) &&
-    _hexHasAdjacentAllyCity(selectedHexId, cityList, activePlayer, board)
-  );
-}
-
-function _checkIfHexContainsEnemyPnj(
-  activePlayer: Player,
-  pnjInDestinationHex?: Pnj
-): boolean {
-  return !!pnjInDestinationHex && isEnemyPnj(pnjInDestinationHex, activePlayer);
-}
-
-function _hexHasAdjacentAllyCity(
-  selectedHexId: string,
-  cityList: City[],
-  activePlayer: Player,
-  board: Hex[][]
-): boolean {
-  const adjacentCity = getAdjacentCityIfAny(selectedHexId, board, cityList);
-  return !!adjacentCity && isAllyCity(adjacentCity, activePlayer);
 }

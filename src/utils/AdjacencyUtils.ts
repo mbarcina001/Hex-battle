@@ -1,4 +1,5 @@
 import { Hex } from '../App.constants';
+import ArrayUtils from './ArrayUtils';
 
 interface Coords {
   x: number;
@@ -6,178 +7,192 @@ interface Coords {
 }
 
 /**
- * Checks if given coordinates are in board boundaries
- * @param {Coords} coords
- * @returns {boolean}
+ * Class with utilities for calculating hex adjacencies
  */
-export function _checkCoordsInBoardBoundaries(coords: Coords): boolean {
-  if (coords.x < 0 || coords.y < 0) {
-    return false;
+export default class AdjacencyUtils {
+  /**
+   * Checks if given coordinates are in board boundaries
+   * @param {Coords} coords
+   * @returns {boolean}
+   */
+  public static _checkCoordsInBoardBoundaries(coords: Coords): boolean {
+    if (coords.x < 0 || coords.y < 0) {
+      return false;
+    }
+
+    return true;
   }
 
-  return true;
-}
+  /**
+   * Given a hex coords returns adjacent hexs coords in y axis
+   * @param {Coords} coords
+   * @returns {Coords[]}
+   */
+  public static _getHorizontalAdjacentCoords(coords: Coords): Coords[] {
+    return [
+      {
+        x: coords.x,
+        y: coords.y - 1
+      },
+      {
+        x: coords.x,
+        y: coords.y + 1
+      }
+    ];
+  }
 
-/**
- * Given a hex coords returns adjacent hexs coords in y axis
- * @param {Coords} coords
- * @returns {Coords[]}
- */
-export function _getHorizontalAdjacentCoords(coords: Coords): Coords[] {
-  return [
-    {
-      x: coords.x,
-      y: coords.y - 1
-    },
-    {
-      x: coords.x,
-      y: coords.y + 1
+  /**
+   * Given a hex coords returns adjacent hexs coords in x axis
+   * @param {Coords} coords
+   * @returns {Coords[]}
+   */
+  public static _getVerticalAdjacentCoords(coords: Coords): Coords[] {
+    return [
+      {
+        x: coords.x - 1,
+        y: coords.y
+      },
+      {
+        x: coords.x + 1,
+        y: coords.y
+      }
+    ];
+  }
+
+  /**
+   * Given a hex coords returns adjacent hexs coords in diagonal
+   * @param {Coords} coords
+   * @param {Hex[]} board
+   * @returns {Coords[]}
+   */
+  public static _getDiagonalAdjacentCoords(
+    coords: Coords,
+    board: Hex[][]
+  ): Coords[] {
+    const mapHeight = board.length;
+    const middleRow = Math.floor(mapHeight / 2);
+
+    if (coords.y < middleRow) {
+      return [
+        {
+          x: coords.x - 1,
+          y: coords.y - 1
+        },
+        {
+          x: coords.x + 1,
+          y: coords.y + 1
+        }
+      ];
     }
-  ];
-}
-
-/**
- * Given a hex coords returns adjacent hexs coords in x axis
- * @param {Coords} coords
- * @returns {Coords[]}
- */
-export function _getVerticalAdjacentCoords(coords: Coords): Coords[] {
-  return [
-    {
-      x: coords.x - 1,
-      y: coords.y
-    },
-    {
-      x: coords.x + 1,
-      y: coords.y
+    if (coords.y > middleRow) {
+      return [
+        {
+          x: coords.x + 1,
+          y: coords.y - 1
+        },
+        {
+          x: coords.x - 1,
+          y: coords.y + 1
+        }
+      ];
     }
-  ];
-}
-
-/**
- * Given a hex coords returns adjacent hexs coords in diagonal
- * @param {Coords} coords
- * @param {Hex[][]} board
- * @returns {Coords[]}
- */
-export function _getDiagonalAdjacentCoords(
-  coords: Coords,
-  board: Hex[][]
-): Coords[] {
-  const mapHeight = board.length;
-  const middleRow = Math.floor(mapHeight / 2);
-
-  if (coords.y < middleRow) {
     return [
       {
         x: coords.x - 1,
         y: coords.y - 1
       },
       {
-        x: coords.x + 1,
-        y: coords.y + 1
-      }
-    ];
-  }
-  if (coords.y > middleRow) {
-    return [
-      {
-        x: coords.x + 1,
-        y: coords.y - 1
-      },
-      {
         x: coords.x - 1,
         y: coords.y + 1
       }
     ];
   }
-  return [
-    {
-      x: coords.x - 1,
-      y: coords.y - 1
-    },
-    {
-      x: coords.x - 1,
-      y: coords.y + 1
-    }
-  ];
-}
 
-/**
- * Parses pnj coords to Coords object
- * @param {Pnj} pnj
- * @returns {Coords}
- */
-export function parseCoordsFromHexId(hexId: string): Coords {
-  return {
-    x: parseInt(hexId.split('_')[0], 10),
-    y: parseInt(hexId.split('_')[1], 10)
-  };
-}
-
-/**
- * Parses Coords object to string
- * @param {Pnj} pnj
- * @returns {strinh}
- */
-export function parseHexIdFromCoords(coords: Coords): string {
-  return `${coords.x}_${coords.y}`;
-}
-
-export function getAdjacentHexIds(
-  hexId: string,
-  board: Hex[][],
-  range = 1
-): string[] {
-  let adjacentHexIds: string[] = [];
-  let hexsToCheck: string[] = [hexId];
-
-  while (range > 0) {
-    const loopResult = _getAdjacentHexIdsFromArray(hexsToCheck, board);
-    hexsToCheck = loopResult;
-    adjacentHexIds = adjacentHexIds.concat(loopResult);
-
-    range -= 1;
+  /**
+   * Parses received coords to Coords object
+   * @param {string} stringCoords
+   * @returns {Coords}
+   */
+  public static parseCoordsFromHexId(stringCoords: string): Coords {
+    return {
+      x: parseInt(stringCoords.split('_')[0], 10),
+      y: parseInt(stringCoords.split('_')[1], 10)
+    };
   }
 
-  return adjacentHexIds;
-}
+  /**
+   * Parses Coords object to string
+   * @param {Coords} coords
+   * @returns {string}
+   */
+  public static parseHexIdFromCoords(coords: Coords): string {
+    return `${coords.x}_${coords.y}`;
+  }
 
-/**
- * Given a hex coords array returns adjacent hexs coords
- * @param {string} hexId
- * @param {Hex[][]} board
- * @returns {string[]}
- */
-function _getAdjacentHexIdsFromArray(
-  hexIds: string[],
-  board: Hex[][]
-): string[] {
-  let result: string[] = [];
+  /**
+   * Retrieves adjacent hex ids to received hexId given any range
+   * @param {string} hexId
+   * @param {Hex[]} board
+   * @param {number} range
+   * @returns {string[]}
+   */
+  public static getAdjacentHexIds(
+    hexId: string,
+    board: Hex[][],
+    range = 1
+  ): string[] {
+    let adjacentHexIds: string[] = [];
+    let hexsToCheck: string[] = [hexId];
 
-  hexIds.forEach(
-    (hexId) => (result = result.concat(_getAdjacentHexIds(hexId, board)))
-  );
+    while (range > 0) {
+      const loopResult = this._getAdjacentHexIdsFromArray(hexsToCheck, board);
+      hexsToCheck = loopResult;
+      adjacentHexIds = adjacentHexIds.concat(loopResult);
 
-  // TODO: FILTER REPEATED
+      range -= 1;
+    }
 
-  return result;
-}
+    return adjacentHexIds;
+  }
 
-/**
- * Given a hex coords returns adjacent hexs coords
- * @param {string} hexId
- * @param {Hex[][]} board
- * @returns {string[]}
- */
-function _getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
-  const coords = parseCoordsFromHexId(hexId);
-  let adjacentCoords: Coords[] = _getHorizontalAdjacentCoords(coords).concat(
-    _getVerticalAdjacentCoords(coords),
-    _getDiagonalAdjacentCoords(coords, board)
-  );
-  adjacentCoords = adjacentCoords.filter((coordsToFilter) =>
-    _checkCoordsInBoardBoundaries(coordsToFilter)
-  );
-  return adjacentCoords.map((coordsToMap) => parseHexIdFromCoords(coordsToMap));
+  /**
+   * Given an hex ids array returns adjacent hexs ids
+   * @param {string[]} hexIds
+   * @param {Hex[]} board
+   * @returns {string[]}
+   */
+  public static _getAdjacentHexIdsFromArray(
+    hexIds: string[],
+    board: Hex[][]
+  ): string[] {
+    let result: string[] = [];
+
+    hexIds.forEach(
+      (hexId) => (result = result.concat(this._getAdjacentHexIds(hexId, board)))
+    );
+
+    return ArrayUtils.filterRepeatedElements(result);
+  }
+
+  /**
+   * Given a hex id returns adjacent hexs ids
+   * @param {string} hexId
+   * @param {Hex[]} board
+   * @returns {string[]}
+   */
+  public static _getAdjacentHexIds(hexId: string, board: Hex[][]): string[] {
+    const coords = this.parseCoordsFromHexId(hexId);
+    let adjacentCoords: Coords[] = this._getHorizontalAdjacentCoords(
+      coords
+    ).concat(
+      this._getVerticalAdjacentCoords(coords),
+      this._getDiagonalAdjacentCoords(coords, board)
+    );
+    adjacentCoords = adjacentCoords.filter((coordsToFilter) =>
+      this._checkCoordsInBoardBoundaries(coordsToFilter)
+    );
+    return adjacentCoords.map((coordsToMap) =>
+      this.parseHexIdFromCoords(coordsToMap)
+    );
+  }
 }
