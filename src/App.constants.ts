@@ -7,7 +7,7 @@ export enum HEX_TYPE {
 
 export interface Hex {
   id: string;
-  type: string;
+  type: HEX_TYPE;
 }
 
 export interface Owner {
@@ -180,8 +180,8 @@ export const PNJ_TYPES: PnjType[] = [
   {
     typeName: PNJ_TYPE_NAME.SOLDIER,
     goldCost: 3,
-    maxHealthPoints: 10,
-    attack: 6,
+    maxHealthPoints: 20,
+    attack: 7,
     defense: 2,
     movementRange: 1,
     visionRange: 1,

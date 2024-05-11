@@ -39,9 +39,11 @@ export default class PnjUtils {
    */
   public static calcDamage(attacker: Pnj, defender: Pnj): number {
     const attackerForce =
-      attacker.type.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+      attacker.type.attack *
+      ((attacker.healthPoints / attacker.type.maxHealthPoints) * 2);
     const deffenderForce =
-      defender.type.defense * (defender.healthPoints / MAX_HEALTH_POINTS);
+      defender.type.defense *
+      (defender.healthPoints / defender.type.maxHealthPoints);
     return Math.floor(attackerForce - deffenderForce);
   }
 
@@ -53,7 +55,8 @@ export default class PnjUtils {
    */
   public static calcCounterDamage(attacker: Pnj, defender: Pnj): number {
     const attackerForce =
-      attacker.type.attack * (attacker.healthPoints / MAX_HEALTH_POINTS);
+      attacker.type.attack *
+      ((attacker.healthPoints / attacker.type.maxHealthPoints) * 4);
     return Math.ceil(attackerForce - defender.type.defense);
   }
 

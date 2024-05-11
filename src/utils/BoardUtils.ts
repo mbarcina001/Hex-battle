@@ -76,7 +76,7 @@ export default class BoardUtils {
     }
 
     if (
-      this._destinationHexContainsUnoccupiedCity(
+      this._destinationHexContainsAllyCity(
         selectedHexId,
         cityList,
         activePlayer,
@@ -151,24 +151,29 @@ export default class BoardUtils {
   }
 
   /**
-   * Checks if destination Hex contains an city with no Owner
+   * Checks if destination Hex contains an city with no Owner + no enemy is in it
    * @param {string} selectedHexId
    * @param {City[]} cityList
    * @param {Player} activePlayer
    * @param {Pnj} pnjInDestinationHex
    * @returns {boolean}
    */
-  public static _destinationHexContainsUnoccupiedCity(
+  public static _destinationHexContainsAllyCity(
     selectedHexId: string,
     cityList: City[],
     activePlayer: Player,
     pnjInDestinationHex?: Pnj
   ): boolean {
-    return (
-      !pnjInDestinationHex &&
-      CityUtils.getCityInHex(selectedHexId, cityList)?.owner?.id ===
-        activePlayer.playerId
-    );
+    if (
+      pnjInDestinationHex &&
+      PnjUtils.isEnemyPnj(pnjInDestinationHex, activePlayer)
+    ) {
+      return false;
+    }
+
+    const cityInHex = CityUtils.getCityInHex(selectedHexId, cityList);
+
+    return !!cityInHex && CityUtils.isAllyCity(cityInHex, activePlayer);
   }
 
   /**

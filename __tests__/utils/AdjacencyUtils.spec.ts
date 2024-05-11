@@ -192,7 +192,7 @@ describe('AdjacencyUtils unit tests', () => {
       AdjacencyUtils._getAdjacentHexIdsFromArray(hexIds, mockBoard);
 
       expect(_getAdjacentHexIdsSpy).toHaveBeenCalledTimes(hexIds.length);
-      expect(_filterRepeatedElementsSpy).toHaveBeenCalled();
+      expect(_filterRepeatedElementsSpy).toHaveBeenCalledTimes(1);
     });
   });
 
